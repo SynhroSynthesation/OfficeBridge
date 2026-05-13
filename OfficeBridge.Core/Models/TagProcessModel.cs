@@ -20,4 +20,6 @@ public sealed class TagProcessModel
     public bool IncludeInspectorRequirement { get; set; }
     public bool IncludeAutomaticTest { get; set; }
     public bool IncludeAdditionalRequirements { get; set; }
+
+    public string AdditionalRequirementsText { get; set; } = string.Empty;
 }

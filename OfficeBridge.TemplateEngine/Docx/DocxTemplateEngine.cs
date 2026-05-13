@@ -1,4 +1,4 @@
-using DocumentFormat.OpenXml;
+﻿using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using OfficeBridge.Core.Interfaces;
@@ -14,10 +14,10 @@ public sealed class DocxTemplateEngine : ITemplateEngine
         CancellationToken cancellationToken = default)
     {
         if (!File.Exists(templatePath))
-            throw new FileNotFoundException("Шаблон не найден.", templatePath);
+            throw new FileNotFoundException("РЁР°Р±Р»РѕРЅ РЅРµ РЅР°Р№РґРµРЅ.", templatePath);
 
         var outputDir = Path.GetDirectoryName(outputPath)
-            ?? throw new InvalidOperationException("Не удалось определить папку для выходного файла.");
+            ?? throw new InvalidOperationException("РќРµ СѓРґР°Р»РѕСЃСЊ РѕРїСЂРµРґРµР»РёС‚СЊ РїР°РїРєСѓ РґР»СЏ РІС‹С…РѕРґРЅРѕРіРѕ С„Р°Р№Р»Р°.");
 
         Directory.CreateDirectory(outputDir);
         File.Copy(templatePath, outputPath, true);
@@ -36,7 +36,10 @@ public sealed class DocxTemplateEngine : ITemplateEngine
         Dictionary<string, string> placeholders)
     {
         var mainPart = document.MainDocumentPart
-            ?? throw new InvalidOperationException("У документа отсутствует MainDocumentPart.");
+            ?? throw new InvalidOperationException("РЈ РґРѕРєСѓРјРµРЅС‚Р° РѕС‚СЃСѓС‚СЃС‚РІСѓРµС‚ MainDocumentPart.");
+
+                if (mainPart.Document is null)
+            throw new InvalidOperationException("РЈ РґРѕРєСѓРјРµРЅС‚Р° РѕС‚СЃСѓС‚СЃС‚РІСѓРµС‚ РєРѕСЂРЅРµРІРѕР№ Document.");
 
         ReplaceInOpenXmlElement(mainPart.Document, placeholders);
         mainPart.Document.Save();

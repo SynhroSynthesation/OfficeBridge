@@ -1,10 +1,13 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
     <ProjectReference Include="..\OfficeBridge.Core\OfficeBridge.Core.csproj" />
     <ProjectReference Include="..\OfficeBridge.Infrastructure\OfficeBridge.Infrastructure.csproj" />
     <ProjectReference Include="..\OfficeBridge.TemplateEngine\OfficeBridge.TemplateEngine.csproj" />
-	  <Resource Include="Assets\logo.png" />
+    <Resource Include="Assets\logo.png" />
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <PropertyGroup>

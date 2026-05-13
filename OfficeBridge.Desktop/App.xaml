@@ -1,7 +1,8 @@
-<Application x:Class="OfficeBridge.Desktop.App"
+﻿<Application x:Class="OfficeBridge.Desktop.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             StartupUri="MainWindow.xaml">
+             Startup="Application_Startup"
+             DispatcherUnhandledException="Application_DispatcherUnhandledException">
     <Application.Resources>
     </Application.Resources>
 </Application>

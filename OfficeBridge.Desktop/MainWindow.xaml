@@ -1,14 +1,14 @@
-<Window x:Class="OfficeBridge.Desktop.MainWindow"
+﻿<Window x:Class="OfficeBridge.Desktop.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="OfficeBridge Desktop"
-        Height="860"
-        Width="1220"
-        MinHeight="760"
-        MinWidth="1050"
+        Height="820"
+        Width="1180"
+        MinHeight="720"
+        MinWidth="980"
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized"
         Background="#F4F7FB">
@@ -86,258 +86,360 @@
             <Setter Property="Margin" Value="0,4,0,4"/>
             <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
         </Style>
+
+        <Style TargetType="TabItem">
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="18,8"/>
+        </Style>
+    
+        <Style x:Key="LanguageSwitchRadioButtonStyle" TargetType="RadioButton">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="#2E75B6"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Height" Value="38"/>
+            <Setter Property="MinWidth" Value="58"/>
+            <Setter Property="Margin" Value="3,0,3,0"/>
+            <Setter Property="Padding" Value="10,4"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
     </Window.Resources>
 
-    <Grid Margin="16">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="12"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="12"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="12"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Auto">
+        <Grid Margin="16">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="12"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="12"/>
+                <RowDefinition Height="220"/>
+            </Grid.RowDefinitions>
 
-        <!-- Header -->
-        <Border Grid.Row="0"
-                Background="{StaticResource PrimaryBrush}"
-                CornerRadius="10"
-                Padding="16">
-            <DockPanel LastChildFill="True">
-                <Border Width="200"
-                        Height="78"
-                        CornerRadius="10"
-                        Background="White"
-                        DockPanel.Dock="Left"
-                        Margin="0,0,16,0"
-                        Padding="6">
-                    <Image Source="Assets/logo.png"
-                           Stretch="Uniform"/>
-                </Border>
+            <!-- Header -->
+            <Border Grid.Row="0"
+                    Background="{StaticResource PrimaryBrush}"
+                    CornerRadius="10"
+                    Padding="16">
+                <DockPanel LastChildFill="True">
+                    <Border Width="200"
+                            Height="78"
+                            CornerRadius="10"
+                            Background="White"
+                            DockPanel.Dock="Left"
+                            Margin="0,0,16,0"
+                            Padding="6">
+                        <Image Source="Assets/logo.png"
+                               Stretch="Uniform"/>
+                    </Border>
 
-                <StackPanel VerticalAlignment="Center">
-                    <TextBlock Text="Fast and Simple"
-                               FontSize="24"
-                               FontWeight="Bold"
-                               Foreground="White"/>
-                    <TextBlock Text="TAG Process document generation"
-                               FontSize="13"
-                               Foreground="#DCE6F2"
-                               Margin="0,4,0,0"/>
-                </StackPanel>
-            </DockPanel>
-        </Border>
+                    <DockPanel LastChildFill="True">
+                        <StackPanel VerticalAlignment="Center"
+                                    DockPanel.Dock="Left">
+                            <TextBlock x:Name="HeaderTitleTextBlock"
+                                       Text="Fast and Simple"
+                                       FontSize="24"
+                                       FontWeight="Bold"
+                                       Foreground="White"/>
+                            <TextBlock x:Name="HeaderSubtitleTextBlock"
+                                       Text="TAG Process document generation"
+                                       FontSize="13"
+                                       Foreground="#DCE6F2"
+                                       Margin="0,4,0,0"/>
+                        </StackPanel>
 
-        <!-- Top section -->
-        <Border Grid.Row="2"
-                Background="{StaticResource CardBrush}"
-                BorderBrush="{StaticResource BorderBrushSoft}"
-                BorderThickness="1"
-                CornerRadius="10"
-                Padding="16">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="1*"/>
-                    <ColumnDefinition Width="18"/>
-                    <ColumnDefinition Width="1*"/>
-                </Grid.ColumnDefinitions>
+                        <StackPanel DockPanel.Dock="Right"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    Width="220">
+                            <TextBlock x:Name="LanguageLabelTextBlock"
+                                       Text="Language"
+                                       Foreground="#DCE6F2"
+                                       FontWeight="SemiBold"
+                                       Margin="0,0,0,4"/>
+                            <UniformGrid Columns="3">
+                                <RadioButton x:Name="EnglishLanguageRadioButton"
+                                             Content="EN"
+                                             GroupName="LanguageSwitch"
+                                             IsChecked="True"
+                                             Style="{StaticResource LanguageSwitchRadioButtonStyle}"
+                                             Checked="LanguageRadioButton_Checked"/>
+                                <RadioButton x:Name="HebrewLanguageRadioButton"
+                                             Content="HE"
+                                             GroupName="LanguageSwitch"
+                                             Style="{StaticResource LanguageSwitchRadioButtonStyle}"
+                                             Checked="LanguageRadioButton_Checked"/>
+                                <RadioButton x:Name="RussianLanguageRadioButton"
+                                             Content="RU"
+                                             GroupName="LanguageSwitch"
+                                             Style="{StaticResource LanguageSwitchRadioButtonStyle}"
+                                             Checked="LanguageRadioButton_Checked"/>
+                            </UniformGrid>
+                        </StackPanel>
+                    </DockPanel>
+                </DockPanel>
+            </Border>
 
-                <StackPanel Grid.Column="0">
-                    <TextBlock Text="Project Data" Style="{StaticResource SectionTitleStyle}"/>
+            <!-- Modes -->
+            <TabControl Grid.Row="2"
+                        Background="Transparent"
+                        BorderThickness="0">
 
-                    <TextBlock Text="Title" Style="{StaticResource FieldLabelStyle}"/>
-                    <TextBox x:Name="TitleTextBox" Style="{StaticResource InputTextBoxStyle}"/>
+                <!-- STANDARD MODE -->
+                <TabItem x:Name="StandardTabItem" Header="STANDARD">
+                    <Grid Margin="0,14,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="12"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
 
-                    <TextBlock Text="Project Number" Style="{StaticResource FieldLabelStyle}"/>
-                    <TextBox x:Name="ProjectNumberTextBox" Style="{StaticResource InputTextBoxStyle}"/>
+                        <!-- Main data -->
+                        <Border Grid.Row="0"
+                                Background="{StaticResource CardBrush}"
+                                BorderBrush="{StaticResource BorderBrushSoft}"
+                                BorderThickness="1"
+                                CornerRadius="10"
+                                Padding="16">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="1*"/>
+                                    <ColumnDefinition Width="18"/>
+                                    <ColumnDefinition Width="1*"/>
+                                </Grid.ColumnDefinitions>
 
-                    <TextBlock Text="Sigma P/N" Style="{StaticResource FieldLabelStyle}"/>
-                    <TextBox x:Name="SigmaPnTextBox" Style="{StaticResource InputTextBoxStyle}"/>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock x:Name="ProjectDataTitleTextBlock" Text="Project Data" Style="{StaticResource SectionTitleStyle}"/>
 
-                    <TextBlock Text="Serial Number" Style="{StaticResource FieldLabelStyle}"/>
-                    <TextBox x:Name="SerialNumberTextBox" Style="{StaticResource InputTextBoxStyle}"/>
+                                    <TextBlock Text="Title" Style="{StaticResource FieldLabelStyle}"/>
+                                    <TextBox x:Name="TitleTextBox" Style="{StaticResource InputTextBoxStyle}"/>
 
-                    <TextBlock Text="Project Manager" Style="{StaticResource FieldLabelStyle}"/>
-                    <TextBox x:Name="ProjectManagerTextBox" Style="{StaticResource InputTextBoxStyle}"/>
+                                    <TextBlock Text="Project Number" Style="{StaticResource FieldLabelStyle}"/>
+                                    <TextBox x:Name="ProjectNumberTextBox" Style="{StaticResource InputTextBoxStyle}"/>
 
-                    <TextBlock Text="Production Quantity" Style="{StaticResource FieldLabelStyle}"/>
-                    <TextBox x:Name="ProductionQuantityTextBox" Style="{StaticResource InputTextBoxStyle}"/>
-                </StackPanel>
+                                    <TextBlock Text="Sigma P/N" Style="{StaticResource FieldLabelStyle}"/>
+                                    <TextBox x:Name="SigmaPnTextBox" Style="{StaticResource InputTextBoxStyle}"/>
 
-                <StackPanel Grid.Column="2">
-                    <TextBlock Text="Document Options" Style="{StaticResource SectionTitleStyle}"/>
+                                    <TextBlock Text="Serial Number" Style="{StaticResource FieldLabelStyle}"/>
+                                    <TextBox x:Name="SerialNumberTextBox" Style="{StaticResource InputTextBoxStyle}"/>
 
-                    <TextBlock Text="Revision" Style="{StaticResource FieldLabelStyle}"/>
-                    <TextBox x:Name="RevisionTextBox" Style="{StaticResource InputTextBoxStyle}"/>
+                                    <TextBlock Text="Project Manager" Style="{StaticResource FieldLabelStyle}"/>
+                                    <TextBox x:Name="ProjectManagerTextBox" Style="{StaticResource InputTextBoxStyle}"/>
 
-                    <TextBlock Text="Closure Status" Style="{StaticResource FieldLabelStyle}"/>
-                    <ComboBox x:Name="ClosureStatusComboBox"
-                              Style="{StaticResource InputComboBoxStyle}"
-                              SelectedIndex="0">
-                        <ComboBoxItem Content="Full Closure"/>
-                        <ComboBoxItem Content="Partial Closure"/>
-                    </ComboBox>
+                                    <TextBlock Text="Production Quantity" Style="{StaticResource FieldLabelStyle}"/>
+                                    <TextBox x:Name="ProductionQuantityTextBox" Style="{StaticResource InputTextBoxStyle}"/>
+                                </StackPanel>
 
-                    <GroupBox Header="Document Package"
-                              Margin="0,10,0,0"
-                              Padding="10">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="1*"/>
-                                <ColumnDefinition Width="18"/>
-                                <ColumnDefinition Width="1*"/>
-                            </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock x:Name="DocumentOptionsTitleTextBlock" Text="Document Options" Style="{StaticResource SectionTitleStyle}"/>
 
-                            <StackPanel Grid.Column="0">
-                                <CheckBox x:Name="MechanicalDrawingCheckBox"
-                                          Content="Mechanical Drawing"
-                                          Style="{StaticResource CheckBoxStyleSoft}"/>
-                                <CheckBox x:Name="ElectricalDrawingCheckBox"
-                                          Content="Electrical Drawing"
-                                          Style="{StaticResource CheckBoxStyleSoft}"/>
-                                <CheckBox x:Name="SpecificationCheckBox"
-                                          Content="Specification"
-                                          Style="{StaticResource CheckBoxStyleSoft}"/>
-                                <CheckBox x:Name="CableCrimpCheckBox"
-                                          Content="Cable Lug Crimp Force Verification"
-                                          Style="{StaticResource CheckBoxStyleSoft}"/>
+                                    <TextBlock Text="Revision" Style="{StaticResource FieldLabelStyle}"/>
+                                    <TextBox x:Name="RevisionTextBox" Style="{StaticResource InputTextBoxStyle}"/>
+
+                                    <TextBlock Text="Closure Status" Style="{StaticResource FieldLabelStyle}"/>
+                                    <ComboBox x:Name="ClosureStatusComboBox"
+                                              Style="{StaticResource InputComboBoxStyle}"
+                                              SelectedIndex="0">
+                                        <ComboBoxItem Content="FULL"/>
+                                        <ComboBoxItem Content="PARTIAL"/>
+                                    </ComboBox>
+
+                                    <GroupBox Header="Document Package"
+                                              Margin="0,10,0,0"
+                                              Padding="10">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="1*"/>
+                                                <ColumnDefinition Width="18"/>
+                                                <ColumnDefinition Width="1*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <StackPanel Grid.Column="0">
+                                                <CheckBox x:Name="MechanicalDrawingCheckBox"
+                                                          Content="Mechanical Drawing"
+                                                          Style="{StaticResource CheckBoxStyleSoft}"/>
+                                                <CheckBox x:Name="ElectricalDrawingCheckBox"
+                                                          Content="Electrical Drawing"
+                                                          Style="{StaticResource CheckBoxStyleSoft}"/>
+                                                <CheckBox x:Name="SpecificationCheckBox"
+                                                          Content="Specification"
+                                                          Style="{StaticResource CheckBoxStyleSoft}"/>
+                                                <CheckBox x:Name="CableCrimpCheckBox"
+                                                          Content="Cable Lug Crimp Force Verification"
+                                                          Style="{StaticResource CheckBoxStyleSoft}"/>
+                                            </StackPanel>
+
+                                            <StackPanel Grid.Column="2">
+                                                <CheckBox x:Name="FaiCheckBox"
+                                                          Content="FAI"
+                                                          Style="{StaticResource CheckBoxStyleSoft}"/>
+                                                <CheckBox x:Name="InspectorRequirementCheckBox"
+                                                          Content="Inspector Requirement"
+                                                          Style="{StaticResource CheckBoxStyleSoft}"/>
+                                                <CheckBox x:Name="AutomaticTestCheckBox"
+                                                          Content="Automatic Test"
+                                                          Style="{StaticResource CheckBoxStyleSoft}"/>
+                                                <CheckBox x:Name="AdditionalRequirementsCheckBox"
+                                                          Content="Additional Requirements"
+                                                          Style="{StaticResource CheckBoxStyleSoft}"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </GroupBox>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <!-- Standard paths and actions -->
+                        <Border Grid.Row="2"
+                                Background="{StaticResource CardBrush}"
+                                BorderBrush="{StaticResource BorderBrushSoft}"
+                                BorderThickness="1"
+                                CornerRadius="10"
+                                Padding="16">
+                            <StackPanel>
+                                <TextBlock x:Name="StandardGenerationTitleTextBlock" Text="Standard Generation" Style="{StaticResource SectionTitleStyle}"/>
+
+                                <TextBlock Text="Template Path" Style="{StaticResource FieldLabelStyle}"/>
+                                <DockPanel>
+                                    <Button x:Name="BrowseTemplateButton"
+                                            Content="..."
+                                            Style="{StaticResource SmallBrowseButtonStyle}"
+                                            DockPanel.Dock="Right"
+                                            Click="BrowseTemplateButton_Click"/>
+                                    <TextBox x:Name="TemplatePathTextBox"
+                                             Style="{StaticResource InputTextBoxStyle}"/>
+                                </DockPanel>
+
+                                <TextBlock Text="Output Folder" Style="{StaticResource FieldLabelStyle}"/>
+                                <DockPanel>
+                                    <Button x:Name="BrowseOutputButton"
+                                            Content="..."
+                                            Style="{StaticResource SmallBrowseButtonStyle}"
+                                            DockPanel.Dock="Right"
+                                            Click="BrowseOutputButton_Click"/>
+                                    <TextBox x:Name="OutputFolderTextBox"
+                                             Style="{StaticResource InputTextBoxStyle}"/>
+                                </DockPanel>
+
+                                <WrapPanel Margin="0,10,0,0">
+                                    <Button x:Name="GenerateButton"
+                                            Content="Generate DOCX + PDF"
+                                            Width="220"
+                                            Style="{StaticResource PrimaryButtonStyle}"
+                                            Click="GenerateButton_Click"/>
+
+                                    <Button x:Name="OpenOutputButton"
+                                            Content="Open Output"
+                                            Width="190"
+                                            Style="{StaticResource SecondaryButtonStyle}"
+                                            Click="OpenOutputButton_Click"/>
+                                </WrapPanel>
                             </StackPanel>
+                        </Border>
+                    </Grid>
+                </TabItem>
 
-                            <StackPanel Grid.Column="2">
-                                <CheckBox x:Name="FaiCheckBox"
-                                          Content="FAI"
-                                          Style="{StaticResource CheckBoxStyleSoft}"/>
-                                <CheckBox x:Name="InspectorRequirementCheckBox"
-                                          Content="Inspector Requirement"
-                                          Style="{StaticResource CheckBoxStyleSoft}"/>
-                                <CheckBox x:Name="AutomaticTestCheckBox"
-                                          Content="Automatic Test"
-                                          Style="{StaticResource CheckBoxStyleSoft}"/>
-                                <CheckBox x:Name="AdditionalRequirementsCheckBox"
-                                          Content="Additional Requirements"
-                                          Style="{StaticResource CheckBoxStyleSoft}"/>
-                            </StackPanel>
-                        </Grid>
-                    </GroupBox>
-                </StackPanel>
-            </Grid>
-        </Border>
+                <!-- ADVANCED MODE -->
+                <TabItem x:Name="AdvancedTabItem" Header="ADVANCED">
+                    <Border Margin="0,14,0,0"
+                            Background="{StaticResource CardBrush}"
+                            BorderBrush="{StaticResource BorderBrushSoft}"
+                            BorderThickness="1"
+                            CornerRadius="10"
+                            Padding="16">
+                        <StackPanel>
+                            <TextBlock x:Name="AdvancedSettingsTitleTextBlock" Text="Advanced Settings" Style="{StaticResource SectionTitleStyle}"/>
 
-        <!-- Paths -->
-        <Border Grid.Row="4"
-                Background="{StaticResource CardBrush}"
-                BorderBrush="{StaticResource BorderBrushSoft}"
-                BorderThickness="1"
-                CornerRadius="10"
-                Padding="16">
-            <StackPanel>
-                <TextBlock Text="Paths and Actions" Style="{StaticResource SectionTitleStyle}"/>
+                            <TextBlock Text="JSON Path" Style="{StaticResource FieldLabelStyle}"/>
+                            <DockPanel>
+                                <Button x:Name="BrowseJsonButton"
+                                        Content="..."
+                                        Style="{StaticResource SmallBrowseButtonStyle}"
+                                        DockPanel.Dock="Right"
+                                        Click="BrowseJsonButton_Click"/>
+                                <TextBox x:Name="JsonPathTextBox"
+                                         Style="{StaticResource InputTextBoxStyle}"/>
+                            </DockPanel>
 
-                <TextBlock Text="Template Path" Style="{StaticResource FieldLabelStyle}"/>
-                <DockPanel>
-                    <Button x:Name="BrowseTemplateButton"
-                            Content="..."
-                            Style="{StaticResource SmallBrowseButtonStyle}"
-                            DockPanel.Dock="Right"
-                            Click="BrowseTemplateButton_Click"/>
-                    <TextBox x:Name="TemplatePathTextBox"
-                             Style="{StaticResource InputTextBoxStyle}"/>
-                </DockPanel>
+                            <TextBlock Text="Archive Folder" Style="{StaticResource FieldLabelStyle}"/>
+                            <DockPanel Margin="0,0,0,12">
+                                <Button x:Name="BrowseArchiveButton"
+                                        Content="..."
+                                        Style="{StaticResource SmallBrowseButtonStyle}"
+                                        DockPanel.Dock="Right"
+                                        Click="BrowseArchiveButton_Click"/>
+                                <TextBox x:Name="ArchiveFolderTextBox"
+                                         Style="{StaticResource InputTextBoxStyle}"/>
+                            </DockPanel>
 
-                <TextBlock Text="JSON Path" Style="{StaticResource FieldLabelStyle}"/>
-                <DockPanel>
-                    <Button x:Name="BrowseJsonButton"
-                            Content="..."
-                            Style="{StaticResource SmallBrowseButtonStyle}"
-                            DockPanel.Dock="Right"
-                            Click="BrowseJsonButton_Click"/>
-                    <TextBox x:Name="JsonPathTextBox"
-                             Style="{StaticResource InputTextBoxStyle}"/>
-                </DockPanel>
+                            <WrapPanel Margin="0,10,0,0">
+                                <Button x:Name="LoadJsonButton"
+                                        Content="Load JSON"
+                                        Width="140"
+                                        Style="{StaticResource SecondaryButtonStyle}"
+                                        Click="LoadJsonButton_Click"/>
 
-                <TextBlock Text="Output Folder" Style="{StaticResource FieldLabelStyle}"/>
-                <DockPanel>
-                    <Button x:Name="BrowseOutputButton"
-                            Content="..."
-                            Style="{StaticResource SmallBrowseButtonStyle}"
-                            DockPanel.Dock="Right"
-                            Click="BrowseOutputButton_Click"/>
-                    <TextBox x:Name="OutputFolderTextBox"
-                             Style="{StaticResource InputTextBoxStyle}"/>
-                </DockPanel>
+                                <Button Content="Open Archive"
+                                        Width="140"
+                                        Style="{StaticResource SecondaryButtonStyle}"
+                                        Click="OpenArchiveButton_Click"/>
+                            </WrapPanel>
 
-                <TextBlock Text="Archive Folder" Style="{StaticResource FieldLabelStyle}"/>
-                <DockPanel Margin="0,0,0,12">
-                    <Button x:Name="BrowseArchiveButton"
-                            Content="..."
-                            Style="{StaticResource SmallBrowseButtonStyle}"
-                            DockPanel.Dock="Right"
-                            Click="BrowseArchiveButton_Click"/>
-                    <TextBox x:Name="ArchiveFolderTextBox"
-                             Style="{StaticResource InputTextBoxStyle}"/>
-                </DockPanel>
+                            <TextBlock Text="Advanced mode is intended for loading data from JSON and changing archive storage location."
+                                       Foreground="{StaticResource MutedBrush}"
+                                       Margin="0,14,0,0"
+                                       TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+                </TabItem>
+            </TabControl>
 
-                <WrapPanel Margin="0,6,0,0">
-                    <Button x:Name="LoadJsonButton"
-                            Content="Load JSON"
-                            Width="140"
-                            Style="{StaticResource SecondaryButtonStyle}"
-                            Click="LoadJsonButton_Click"/>
+            <!-- Log -->
+            <Border Grid.Row="4"
+                    Background="{StaticResource CardBrush}"
+                    BorderBrush="{StaticResource BorderBrushSoft}"
+                    BorderThickness="1"
+                    CornerRadius="10"
+                    Padding="16">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="10"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-                    <Button x:Name="GenerateButton"
-                            Content="Generate DOCX + PDF"
-                            Width="220"
-                            Style="{StaticResource PrimaryButtonStyle}"
-                            Click="GenerateButton_Click"/>
+                    <DockPanel>
+                        <TextBlock x:Name="ExecutionLogTitleTextBlock" Text="Execution Log"
+                                   FontSize="18"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource PrimaryBrush}"
+                                   DockPanel.Dock="Left"/>
+                        <TextBlock Text="Status messages and errors"
+                                   Foreground="{StaticResource MutedBrush}"
+                                   Margin="14,3,0,0"/>
+                    </DockPanel>
 
-                    <Button x:Name="OpenOutputButton"
-                            Content="Open Output"
-                            Width="130"
-                            Style="{StaticResource SecondaryButtonStyle}"
-                            Click="OpenOutputButton_Click"/>
-                </WrapPanel>
-            </StackPanel>
-        </Border>
-
-        <!-- Log -->
-        <Border Grid.Row="6"
-                Background="{StaticResource CardBrush}"
-                BorderBrush="{StaticResource BorderBrushSoft}"
-                BorderThickness="1"
-                CornerRadius="10"
-                Padding="16">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="10"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-
-                <DockPanel>
-                    <TextBlock Text="Execution Log"
-                               FontSize="18"
-                               FontWeight="SemiBold"
-                               Foreground="{StaticResource PrimaryBrush}"
-                               DockPanel.Dock="Left"/>
-                    <TextBlock Text="Status messages and errors"
-                               Foreground="{StaticResource MutedBrush}"
-                               Margin="14,3,0,0"/>
-                </DockPanel>
-
-                <TextBox Grid.Row="2"
-                         x:Name="LogTextBox"
-                         IsReadOnly="True"
-                         TextWrapping="Wrap"
-                         VerticalScrollBarVisibility="Auto"
-                         HorizontalScrollBarVisibility="Auto"
-                         AcceptsReturn="True"
-                         FontFamily="Consolas"
-                         Background="#F8FAFC"
-                         BorderBrush="#D6DEE8"
-                         BorderThickness="1"
-                         Padding="10"/>
-            </Grid>
-        </Border>
-    </Grid>
+                    <TextBox Grid.Row="2"
+                             x:Name="LogTextBox"
+                             IsReadOnly="True"
+                             TextWrapping="Wrap"
+                             VerticalScrollBarVisibility="Auto"
+                             HorizontalScrollBarVisibility="Auto"
+                             AcceptsReturn="True"
+                             FontFamily="Consolas"
+                             Background="#F8FAFC"
+                             BorderBrush="#D6DEE8"
+                             BorderThickness="1"
+                             Padding="10"/>
+                </Grid>
+            </Border>
+        </Grid>
+    </ScrollViewer>
 </Window>
+
+
+
+
+

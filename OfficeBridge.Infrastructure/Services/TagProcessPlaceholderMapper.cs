@@ -25,7 +25,12 @@ public static class TagProcessPlaceholderMapper
             ["FAI"] = model.IncludeFai ? "FAI" : string.Empty,
             ["INSPECTOR_REQUIREMENT"] = model.IncludeInspectorRequirement ? "Inspector Requirement" : string.Empty,
             ["AUTOMATIC_TEST"] = model.IncludeAutomaticTest ? "Automatic Test" : string.Empty,
-            ["ADDITIONAL_REQUIREMENTS"] = model.IncludeAdditionalRequirements ? "Additional Requirements" : string.Empty,
+            ["ADDITIONAL_REQUIREMENTS"] =
+    model.IncludeAdditionalRequirements
+        ? (string.IsNullOrWhiteSpace(model.AdditionalRequirementsText)
+            ? "Additional Requirements"
+            : model.AdditionalRequirementsText)
+            : string.Empty,
         };
     }
 }
