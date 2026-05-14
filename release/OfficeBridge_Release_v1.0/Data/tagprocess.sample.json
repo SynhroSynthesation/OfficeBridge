@@ -1,0 +1,18 @@
+{
+  "Title": "Control Box Assembly",
+  "ProjectNumber": "PRJ-4587",
+  "SigmaPn": "SIG-BOX-001",
+  "SerialNumber": "SN-2026-001",
+  "ProjectManager": "John Smith",
+  "ProductionQuantity": "25",
+  "Revision": "A",
+  "ClosureStatus": "Full Closure",
+  "IncludeMechanicalDrawing": true,
+  "IncludeElectricalDrawing": true,
+  "IncludeSpecification": true,
+  "IncludeCableCrimpVerification": false,
+  "IncludeFai": false,
+  "IncludeInspectorRequirement": false,
+  "IncludeAutomaticTest": true,
+  "IncludeAdditionalRequirements": false
+}

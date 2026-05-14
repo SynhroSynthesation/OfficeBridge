@@ -1,0 +1,43 @@
+﻿OFFICEBRIDGE - JSON LOADING ALGORITHM
+
+1. User clicks Load JSON.
+2. Program opens file selection dialog.
+3. User selects .json file.
+4. Program checks that file exists.
+5. Program reads file as UTF-8.
+6. Program parses JSON.
+7. Program validates required fields.
+8. Program displays data in UI.
+9. User clicks Generate.
+10. Program sends data to DOCX template engine.
+11. Template engine replaces tags in DOCX.
+12. Generated DOCX is saved to Output folder.
+13. PDF is created if export is enabled.
+
+Recommended required fields:
+
+ProjectName
+PartNumber
+Revision
+ProjectManager
+UnitsToProduce
+
+Example JSON:
+
+{
+  "ProjectName": "TAG Process",
+  "PartNumber": "PN-001",
+  "SerialNumber": "SN-0001",
+  "Revision": "A",
+  "UnitsToProduce": 50,
+  "ProjectManager": "Yuri",
+  "ClosureType": "Full",
+  "MechanicalDrawing": true,
+  "ElectricalDrawing": true,
+  "Specification": true,
+  "CableCrimpForceCheck": true,
+  "FAI": false,
+  "InspectorRequirement": true,
+  "AutomaticCheck": false,
+  "AdditionalRequirements": "No additional requirements"
+}

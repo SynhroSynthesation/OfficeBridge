@@ -1,238 +1,278 @@
-﻿# build-release.ps1
-# OfficeBridge release builder.
-# Run from project root:
-# powershell -ExecutionPolicy Bypass -File .\build-release.ps1
-
 $ErrorActionPreference = "Stop"
 
-$Root = "C:\SOFTWARE\Fast_Tag-process\OfficeBridge"
-$DefaultTemplate = "C:\SOFTWARE\Fast_Tag-process\TAG-process_HARNESS.docx"
+$ProjectName = "OfficeBridge"
+$DesktopProject = "OfficeBridge.Desktop"
+$Configuration = "Release"
+$Runtime = "win-x64"
 
-$Project = Join-Path $Root "OfficeBridge.Desktop\OfficeBridge.Desktop.csproj"
-$Solution = Join-Path $Root "OfficeBridge.sln"
-$ReleaseRoot = Join-Path $Root "Release"
-$ReleaseDir = Join-Path $ReleaseRoot "OfficeBridge"
-$PublishDir = Join-Path $Root "OfficeBridge.Desktop\bin\Release\net9.0-windows\win-x64\publish"
+$Root = Split-Path -Parent $MyInvocation.MyCommand.Path
+$ReleaseRoot = Join-Path $Root "release"
+$PublishDir = Join-Path $ReleaseRoot "publish"
+$PackageDir = Join-Path $ReleaseRoot "OfficeBridge_Release_v1.0"
+$ZipPath = Join-Path $ReleaseRoot "OfficeBridge_Release_v1.0.zip"
 
-
-function Stop-OfficeBridgeProcess {
-    $processes = Get-Process "OfficeBridge.Desktop" -ErrorAction SilentlyContinue
-
-    if ($null -ne $processes) {
-        Write-Host "Stopping running OfficeBridge.Desktop process..." -ForegroundColor DarkYellow
-        $processes | Stop-Process -Force
-        Start-Sleep -Milliseconds 700
-    }
-}
-
-function Write-Step($Text) {
-    Write-Host "`n[$Text]" -ForegroundColor Yellow
-}
-
-function Find-TemplateDocx {
-    param(
-        [string]$Root,
-        [string]$DefaultTemplate
-    )
-
-    if (Test-Path $DefaultTemplate) {
-        return $DefaultTemplate
-    }
-
-    $PreferredNames = @(
-        "TAG-process_HARNESS.docx",
-        "TAG-procees.docx",
-        "TAG-procees(2).docx",
-        "TAG-process.docx",
-        "TAG-process(2).docx"
-    )
-
-    foreach ($name in $PreferredNames) {
-        $path = Join-Path $Root $name
-        if (Test-Path $path) {
-            return $path
-        }
-    }
-
-    $found = Get-ChildItem -Path $Root -Recurse -Filter "*.docx" -File |
-        Where-Object {
-            $_.FullName -notmatch "\\bin\\" -and
-            $_.FullName -notmatch "\\obj\\" -and
-            $_.FullName -notmatch "\\Release\\" -and
-            $_.FullName -notmatch "\\Archive\\" -and
-            $_.FullName -notmatch "\\Output\\" -and
-            $_.Name -notmatch "^TAG_PR"
-        } |
-        Sort-Object FullName |
-        Select-Object -First 1
-
-    if ($null -ne $found) {
-        return $found.FullName
-    }
-
-    return $null
-}
+$DesktopCsproj = Join-Path $Root "$DesktopProject\$DesktopProject.csproj"
 
 Write-Host "=== OfficeBridge Release Builder ===" -ForegroundColor Cyan
 Write-Host "Root: $Root"
+Write-Host "Project: $DesktopCsproj"
 
-if (!(Test-Path $Solution)) {
-    throw "Solution file not found: $Solution"
+if (!(Test-Path $DesktopCsproj)) {
+    throw "Desktop project not found: $DesktopCsproj"
 }
 
-if (!(Test-Path $Project)) {
-    throw "Project file not found: $Project"
+if (Test-Path $ReleaseRoot) {
+    Remove-Item $ReleaseRoot -Recurse -Force
 }
 
-Stop-OfficeBridgeProcess
+New-Item -ItemType Directory -Path $ReleaseRoot -Force | Out-Null
+New-Item -ItemType Directory -Path $PublishDir -Force | Out-Null
+New-Item -ItemType Directory -Path $PackageDir -Force | Out-Null
 
-Write-Step "1/7 Cleaning old release"
-if (Test-Path $ReleaseDir) {
-    Remove-Item $ReleaseDir -Recurse -Force
-}
-New-Item -ItemType Directory -Path $ReleaseDir -Force | Out-Null
+Write-Host ""
+Write-Host "[1/7] Restore..." -ForegroundColor Yellow
+dotnet restore $DesktopCsproj
 
-Write-Step "2/7 Restoring packages"
-dotnet restore $Solution
-
-Write-Step "3/7 Publishing Desktop app"
-dotnet publish $Project `
-    -c Release `
-    -r win-x64 `
-    --self-contained false `
+Write-Host ""
+Write-Host "[2/7] Publish..." -ForegroundColor Yellow
+dotnet publish $DesktopCsproj `
+    -c $Configuration `
+    -r $Runtime `
+    --self-contained true `
     -p:PublishSingleFile=false `
-    -p:IncludeNativeLibrariesForSelfExtract=true
+    -p:IncludeNativeLibrariesForSelfExtract=true `
+    -o $PublishDir
 
-if (!(Test-Path $PublishDir)) {
-    throw "Publish directory not found: $PublishDir"
+Write-Host ""
+Write-Host "[3/7] Copy published files..." -ForegroundColor Yellow
+Copy-Item -Path (Join-Path $PublishDir "*") -Destination $PackageDir -Recurse -Force
+
+$TemplatesDir = Join-Path $PackageDir "Templates"
+$DataDir = Join-Path $PackageDir "Data"
+$OutputDir = Join-Path $PackageDir "Output"
+$LogsDir = Join-Path $PackageDir "Logs"
+$DocsDir = Join-Path $PackageDir "Docs"
+
+New-Item -ItemType Directory -Path $TemplatesDir -Force | Out-Null
+New-Item -ItemType Directory -Path $DataDir -Force | Out-Null
+New-Item -ItemType Directory -Path $OutputDir -Force | Out-Null
+New-Item -ItemType Directory -Path $LogsDir -Force | Out-Null
+New-Item -ItemType Directory -Path $DocsDir -Force | Out-Null
+
+Write-Host ""
+Write-Host "[4/7] Copy templates and data..." -ForegroundColor Yellow
+
+$TemplateSources = @(
+    (Join-Path $Root "Templates"),
+    (Join-Path $Root "OfficeBridge.App\Templates"),
+    (Join-Path $Root "OfficeBridge.Desktop\Templates")
+)
+
+foreach ($src in $TemplateSources) {
+    if (Test-Path $src) {
+        Copy-Item -Path (Join-Path $src "*") -Destination $TemplatesDir -Recurse -Force -ErrorAction SilentlyContinue
+    }
 }
 
-Write-Step "4/7 Copying publish output"
-Copy-Item "$PublishDir\*" $ReleaseDir -Recurse -Force
+$DataSources = @(
+    (Join-Path $Root "Data"),
+    (Join-Path $Root "OfficeBridge.App\Data"),
+    (Join-Path $Root "OfficeBridge.Desktop\Data")
+)
 
-Write-Step "5/7 Copying required folders and files"
-
-# Copy Assets
-$SourceAssets = Join-Path $Root "OfficeBridge.Desktop\Assets"
-$ReleaseAssets = Join-Path $ReleaseDir "Assets"
-
-if (Test-Path $SourceAssets) {
-    New-Item -ItemType Directory -Path $ReleaseAssets -Force | Out-Null
-    Copy-Item "$SourceAssets\*" $ReleaseAssets -Recurse -Force
-    Write-Host "Copied: Assets"
-}
-else {
-    Write-Host "Warning: Assets folder not found: $SourceAssets" -ForegroundColor DarkYellow
+foreach ($src in $DataSources) {
+    if (Test-Path $src) {
+        Copy-Item -Path (Join-Path $src "*") -Destination $DataDir -Recurse -Force -ErrorAction SilentlyContinue
+    }
 }
 
-# Copy appsettings.json explicitly
-$SourceAppSettings = Join-Path $Root "OfficeBridge.Desktop\appsettings.json"
-if (Test-Path $SourceAppSettings) {
-    Copy-Item $SourceAppSettings (Join-Path $ReleaseDir "appsettings.json") -Force
-    Write-Host "Copied: appsettings.json"
-}
-else {
-    Write-Host "Warning: appsettings.json not found." -ForegroundColor DarkYellow
-}
+Write-Host ""
+Write-Host "[5/7] Create demo JSON if missing..." -ForegroundColor Yellow
 
-# Copy correct DOCX template
-$TemplatePath = Find-TemplateDocx -Root $Root -DefaultTemplate $DefaultTemplate
+$SampleJson = Join-Path $DataDir "tagprocess.sample.json"
 
-if ($null -ne $TemplatePath -and (Test-Path $TemplatePath)) {
-    Copy-Item $TemplatePath (Join-Path $ReleaseDir "TAG-process_HARNESS.docx") -Force
-    Copy-Item $TemplatePath (Join-Path $ReleaseDir "TAG-procees.docx") -Force
-    Write-Host "Copied template: $TemplatePath"
+if (!(Test-Path $SampleJson)) {
+@'
+{
+  "ProjectName": "TAG Process",
+  "PartNumber": "PN-001",
+  "SerialNumber": "SN-0001",
+  "Revision": "A",
+  "UnitsToProduce": 50,
+  "ProjectManager": "Yuri",
+  "ClosureType": "Full",
+  "MechanicalDrawing": true,
+  "ElectricalDrawing": true,
+  "Specification": true,
+  "CableCrimpForceCheck": true,
+  "FAI": false,
+  "InspectorRequirement": true,
+  "AutomaticCheck": false,
+  "AdditionalRequirements": "No additional requirements"
 }
-else {
-    Write-Host "Warning: DOCX template not found. Expected: $DefaultTemplate" -ForegroundColor DarkYellow
-}
-
-# Copy sample JSON
-$SampleJson = Join-Path $Root "OfficeBridge.App\Data\tagprocess.sample.json"
-if (Test-Path $SampleJson) {
-    New-Item -ItemType Directory -Path (Join-Path $ReleaseDir "Data") -Force | Out-Null
-    Copy-Item $SampleJson (Join-Path $ReleaseDir "Data\tagprocess.sample.json") -Force
-    Write-Host "Copied: sample JSON"
-}
-else {
-    Write-Host "Warning: sample JSON not found." -ForegroundColor DarkYellow
+'@ | Set-Content -Path $SampleJson -Encoding UTF8
 }
 
-# Create Output and Archive folders
-New-Item -ItemType Directory -Path (Join-Path $ReleaseDir "Output") -Force | Out-Null
-New-Item -ItemType Directory -Path (Join-Path $ReleaseDir "Archive") -Force | Out-Null
+Write-Host ""
+Write-Host "[6/7] Create readme files..." -ForegroundColor Yellow
 
-Write-Step "6/7 Writing helper files"
+$StartBat = Join-Path $PackageDir "start_OfficeBridge.bat"
 
-$RunBat = @"
+@'
 @echo off
+chcp 65001 > nul
 cd /d "%~dp0"
 start "" "OfficeBridge.Desktop.exe"
-"@
-Set-Content -Path (Join-Path $ReleaseDir "RUN_OfficeBridge.bat") -Value $RunBat -Encoding ASCII
+'@ | Set-Content -Path $StartBat -Encoding ASCII
 
-$DebugBat = @"
-@echo off
-cd /d "%~dp0"
-OfficeBridge.Desktop.exe
-pause
-"@
-Set-Content -Path (Join-Path $ReleaseDir "RUN_DEBUG_OfficeBridge.bat") -Value $DebugBat -Encoding ASCII
+$InstallReadme = Join-Path $DocsDir "INSTALL.txt"
 
-$UserReadme = @"
-OfficeBridge - User Instructions
+@'
+OFFICEBRIDGE - INSTALLATION
 
-Run:
-RUN_OfficeBridge.bat
+1. Extract OfficeBridge_Release_v1.0.zip to a local folder.
+   Example:
+   C:\OfficeBridge\
 
-If the program does not start:
-RUN_DEBUG_OfficeBridge.bat
+2. Do not run the program directly from ZIP.
 
-Default template:
-C:\SOFTWARE\Fast_Tag-process\TAG-process_HARNESS.docx
+3. Start the program:
+   - OfficeBridge.Desktop.exe
+   or
+   - start_OfficeBridge.bat
 
-Release local fallback template:
-TAG-process_HARNESS.docx
+4. Required system:
+   - Windows 10 or Windows 11 x64
+   - Screen resolution 1024x768 or higher
 
-Output folder:
+5. This release is self-contained.
+   .NET Runtime installation is not required.
+
+6. For PDF export install LibreOffice.
+   Default path:
+   C:\Program Files\LibreOffice\program\soffice.exe
+'@ | Set-Content -Path $InstallReadme -Encoding UTF8
+
+$UsageReadme = Join-Path $DocsDir "USAGE.txt"
+
+@'
+OFFICEBRIDGE - USER MANUAL
+
+Main workflow:
+
+1. Start OfficeBridge.
+2. Select DOCX template from Templates folder.
+3. Load JSON file from Data folder.
+4. Check loaded data in the program window.
+5. Select output folder.
+6. Generate document.
+7. Check generated DOCX in Output folder.
+8. Export PDF if needed.
+
+Folders:
+
+Templates
+- DOCX templates.
+
+Data
+- JSON input files.
+
 Output
+- Generated documents.
 
-Archive folder:
-Archive
+Logs
+- Program logs.
 
-If PDF is not created, check LibreOffice path in appsettings.json:
-C:\Program Files\LibreOffice\program\soffice.exe
-"@
-Set-Content -Path (Join-Path $ReleaseDir "README_FOR_USER.txt") -Value $UserReadme -Encoding UTF8
+Recommended flow:
 
-Write-Step "7/7 Validating release"
+1. Copy sample JSON.
+2. Rename it for a real project.
+3. Fill project data.
+4. Load JSON in OfficeBridge.
+5. Generate test document.
+6. Check result manually.
+7. Use the document as production output.
+'@ | Set-Content -Path $UsageReadme -Encoding UTF8
 
-$ExePath = Join-Path $ReleaseDir "OfficeBridge.Desktop.exe"
-$LogoPath = Join-Path $ReleaseDir "Assets\logo.png"
-$SettingsPath = Join-Path $ReleaseDir "appsettings.json"
-$TemplateReleasePath = Join-Path $ReleaseDir "TAG-process_HARNESS.docx"
+$JsonReadme = Join-Path $DocsDir "JSON_GUIDE.txt"
 
-Write-Host "Exe exists:       $(Test-Path $ExePath)"
-Write-Host "Settings exists:  $(Test-Path $SettingsPath)"
-Write-Host "Logo exists:      $(Test-Path $LogoPath)"
-Write-Host "Template exists:  $(Test-Path $TemplateReleasePath)"
+@'
+OFFICEBRIDGE - JSON LOADING ALGORITHM
 
-if (!(Test-Path $ExePath)) {
-    throw "Release validation failed: EXE missing."
+1. User clicks Load JSON.
+2. Program opens file selection dialog.
+3. User selects .json file.
+4. Program checks that file exists.
+5. Program reads file as UTF-8.
+6. Program parses JSON.
+7. Program validates required fields.
+8. Program displays data in UI.
+9. User clicks Generate.
+10. Program sends data to DOCX template engine.
+11. Template engine replaces tags in DOCX.
+12. Generated DOCX is saved to Output folder.
+13. PDF is created if export is enabled.
+
+Recommended required fields:
+
+ProjectName
+PartNumber
+Revision
+ProjectManager
+UnitsToProduce
+
+Example JSON:
+
+{
+  "ProjectName": "TAG Process",
+  "PartNumber": "PN-001",
+  "SerialNumber": "SN-0001",
+  "Revision": "A",
+  "UnitsToProduce": 50,
+  "ProjectManager": "Yuri",
+  "ClosureType": "Full",
+  "MechanicalDrawing": true,
+  "ElectricalDrawing": true,
+  "Specification": true,
+  "CableCrimpForceCheck": true,
+  "FAI": false,
+  "InspectorRequirement": true,
+  "AutomaticCheck": false,
+  "AdditionalRequirements": "No additional requirements"
+}
+'@ | Set-Content -Path $JsonReadme -Encoding UTF8
+
+Write-Host ""
+Write-Host "[7/7] Create ZIP..." -ForegroundColor Yellow
+
+if (Test-Path $ZipPath) {
+    Remove-Item $ZipPath -Force
 }
 
-if (!(Test-Path $SettingsPath)) {
-    throw "Release validation failed: appsettings.json missing."
+Compress-Archive -Path (Join-Path $PackageDir "*") -DestinationPath $ZipPath -Force
+
+Write-Host ""
+Write-Host "DONE!" -ForegroundColor Green
+Write-Host "Release folder:"
+Write-Host $PackageDir
+Write-Host ""
+Write-Host "ZIP archive:"
+Write-Host $ZipPath
+# Copy Templates into release package
+$TemplatesSource = Join-Path $PSScriptRoot "Templates"
+
+if (Test-Path $TemplatesSource) {
+    if ($ReleaseDir) {
+        $TemplatesTarget = Join-Path $ReleaseDir "Templates"
+    }
+    else {
+        $TemplatesTarget = Join-Path $PSScriptRoot "release\Templates"
+    }
+
+    New-Item -ItemType Directory -Path $TemplatesTarget -Force | Out-Null
+    Copy-Item "$TemplatesSource\*" $TemplatesTarget -Recurse -Force
+    Write-Host "Templates copied to release package." -ForegroundColor Green
 }
-
-if (!(Test-Path $LogoPath)) {
-    throw "Release validation failed: Assets\logo.png missing."
+else {
+    Write-Host "WARNING: Templates folder not found." -ForegroundColor Yellow
 }
-
-if (!(Test-Path $TemplateReleasePath)) {
-    Write-Host "Warning: release template missing. App can still run, but default template may be missing." -ForegroundColor DarkYellow
-}
-
-Write-Host "`nRelease folder ready:" -ForegroundColor Green
-Write-Host $ReleaseDir -ForegroundColor Green
-

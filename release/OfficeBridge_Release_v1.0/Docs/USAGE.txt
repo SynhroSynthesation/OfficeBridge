@@ -1,0 +1,36 @@
+﻿OFFICEBRIDGE - USER MANUAL
+
+Main workflow:
+
+1. Start OfficeBridge.
+2. Select DOCX template from Templates folder.
+3. Load JSON file from Data folder.
+4. Check loaded data in the program window.
+5. Select output folder.
+6. Generate document.
+7. Check generated DOCX in Output folder.
+8. Export PDF if needed.
+
+Folders:
+
+Templates
+- DOCX templates.
+
+Data
+- JSON input files.
+
+Output
+- Generated documents.
+
+Logs
+- Program logs.
+
+Recommended flow:
+
+1. Copy sample JSON.
+2. Rename it for a real project.
+3. Fill project data.
+4. Load JSON in OfficeBridge.
+5. Generate test document.
+6. Check result manually.
+7. Use the document as production output.

@@ -1,0 +1,23 @@
+﻿OFFICEBRIDGE - INSTALLATION
+
+1. Extract OfficeBridge_Release_v1.0.zip to a local folder.
+   Example:
+   C:\OfficeBridge\
+
+2. Do not run the program directly from ZIP.
+
+3. Start the program:
+   - OfficeBridge.Desktop.exe
+   or
+   - start_OfficeBridge.bat
+
+4. Required system:
+   - Windows 10 or Windows 11 x64
+   - Screen resolution 1024x768 or higher
+
+5. This release is self-contained.
+   .NET Runtime installation is not required.
+
+6. For PDF export install LibreOffice.
+   Default path:
+   C:\Program Files\LibreOffice\program\soffice.exe

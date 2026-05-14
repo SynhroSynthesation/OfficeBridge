@@ -1,3 +1,4 @@
+using System.IO;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,18 +19,21 @@ public sealed class LibreOfficeProvider : IOfficeProvider
 
     public bool IsAvailable()
     {
-        return File.Exists(_sofficePath);
-    }
+        if (!string.IsNullOrWhiteSpace(_sofficePath) && File.Exists(_sofficePath))
+            return true;
 
+        return LibreOfficeDetector.TryFind(out _);
+    }
+    
     public Task OpenAsync(
         string filePath,
         CancellationToken cancellationToken = default)
     {
         if (!File.Exists(filePath))
-            throw new FileNotFoundException("Файл не найден.", filePath);
+            throw new FileNotFoundException("Р¤Р°Р№Р» РЅРµ РЅР°Р№РґРµРЅ.", filePath);
 
         if (!File.Exists(_sofficePath))
-            throw new FileNotFoundException("LibreOffice (soffice.exe) не найден.", _sofficePath);
+            throw new FileNotFoundException("LibreOffice (soffice.exe) РЅРµ РЅР°Р№РґРµРЅ.", _sofficePath);
 
         Process.Start(new ProcessStartInfo
         {
@@ -47,13 +51,13 @@ public sealed class LibreOfficeProvider : IOfficeProvider
         CancellationToken cancellationToken = default)
     {
         if (!File.Exists(inputPath))
-            throw new FileNotFoundException("Исходный файл не найден.", inputPath);
+            throw new FileNotFoundException("РСЃС…РѕРґРЅС‹Р№ С„Р°Р№Р» РЅРµ РЅР°Р№РґРµРЅ.", inputPath);
 
         if (!File.Exists(_sofficePath))
-            throw new FileNotFoundException("LibreOffice (soffice.exe) не найден.", _sofficePath);
+            throw new FileNotFoundException("LibreOffice (soffice.exe) РЅРµ РЅР°Р№РґРµРЅ.", _sofficePath);
 
         var outputDir = Path.GetDirectoryName(outputPdfPath)
-            ?? throw new InvalidOperationException("Не удалось определить папку вывода.");
+            ?? throw new InvalidOperationException("РќРµ СѓРґР°Р»РѕСЃСЊ РѕРїСЂРµРґРµР»РёС‚СЊ РїР°РїРєСѓ РІС‹РІРѕРґР°.");
 
         Directory.CreateDirectory(outputDir);
 
@@ -82,7 +86,7 @@ public sealed class LibreOfficeProvider : IOfficeProvider
         if (process.ExitCode != 0)
         {
             throw new InvalidOperationException(
-                $"Ошибка конвертации LibreOffice. Code={process.ExitCode}\nOUT:{stdOut}\nERR:{stdErr}");
+                $"РћС€РёР±РєР° РєРѕРЅРІРµСЂС‚Р°С†РёРё LibreOffice. Code={process.ExitCode}\nOUT:{stdOut}\nERR:{stdErr}");
         }
 
         var producedPdf = Path.Combine(
@@ -90,7 +94,7 @@ public sealed class LibreOfficeProvider : IOfficeProvider
             Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
 
         if (!File.Exists(producedPdf))
-            throw new FileNotFoundException("LibreOffice не создал PDF.", producedPdf);
+            throw new FileNotFoundException("LibreOffice РЅРµ СЃРѕР·РґР°Р» PDF.", producedPdf);
 
         if (!string.Equals(producedPdf, outputPdfPath, StringComparison.OrdinalIgnoreCase))
         {

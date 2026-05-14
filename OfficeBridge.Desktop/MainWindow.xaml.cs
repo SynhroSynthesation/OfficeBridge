@@ -1,4 +1,5 @@
-﻿using OfficeBridge.Core.Models;
+﻿using System.Text.Encodings.Web;
+using OfficeBridge.Core.Models;
 using OfficeBridge.Infrastructure.Office;
 using OfficeBridge.Infrastructure.Services;
 using OfficeBridge.Infrastructure.Storage;
@@ -42,7 +43,8 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        InitializeDefaults();
+            ApplyLanguage("English");
+InitializeDefaults();
     }
 
     private void InitializeDefaults()
@@ -241,13 +243,13 @@ public partial class MainWindow : Window
             if (File.Exists(result.pdfPath))
             {
                 AppendLog($"PDF : {result.pdfPath}");
-                MessageBox.Show("DOCX and PDF were created successfully.", "Done", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("Document was created successfully.", "Done", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             else
             {
                 AppendLog("PDF : was not created.");
                 MessageBox.Show(
-                    "DOCX was created, but PDF was not created. Check LibreOffice path in appsettings.json.",
+                    "DOCX was created successfully. PDF export was skipped because LibreOffice was not found or PDF conversion failed. You can continue using the DOCX file.",
                     "Done with warning",
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning);
@@ -262,46 +264,36 @@ public partial class MainWindow : Window
     }
 
     private void LoadJsonButton_Click(object sender, RoutedEventArgs e)
+{
+    try
     {
-        try
+        var jsonPath = JsonPathTextBox.Text?.Trim();
+
+        if (string.IsNullOrWhiteSpace(jsonPath))
         {
-            var jsonPath = JsonPathTextBox.Text.Trim();
-
-            if (!File.Exists(jsonPath))
-            {
-                MessageBox.Show("JSON file was not found.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-
-            var json = File.ReadAllText(jsonPath);
-            var model = JsonSerializer.Deserialize<TagProcessModel>(json, new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            });
-
-            if (model is null)
-            {
-                MessageBox.Show("Could not deserialize JSON.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-
-            TitleTextBox.Text = model.Title;
-            ProjectNumberTextBox.Text = model.ProjectNumber;
-            SigmaPnTextBox.Text = model.SigmaPn;
-            SerialNumberTextBox.Text = model.SerialNumber;
-
-            ProjectManagerTextBox.Text = model.ProjectManager;
-            ProductionQuantityTextBox.Text = model.ProductionQuantity;
-            RevisionTextBox.Text = model.Revision;
-
-            AppendLog($"JSON loaded: {jsonPath}");
+            MessageBox.Show("JSON path is empty.", "Load JSON", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
         }
-        catch (Exception ex)
+
+        if (!System.IO.File.Exists(jsonPath))
         {
-            AppendLog(ex.ToString());
-            MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show($"JSON file not found: {jsonPath}", "Load JSON", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
         }
+
+        var json = System.IO.File.ReadAllText(jsonPath, System.Text.Encoding.UTF8);
+
+        // Universal loader: supports archived JSON with ProductName and old sample JSON aliases.
+        LoadJsonIntoCurrentUi(json);
+
+        AppendLog($"JSON loaded: {jsonPath}");
     }
+    catch (Exception ex)
+    {
+        AppendLog($"ERROR loading JSON: {ex.Message}");
+        MessageBox.Show(ex.Message, "Load JSON", MessageBoxButton.OK, MessageBoxImage.Error);
+    }
+}
 
     private void BrowseTemplateButton_Click(object sender, RoutedEventArgs e)
     {
@@ -428,10 +420,10 @@ public partial class MainWindow : Window
 
     private int GetSelectedLanguageIndex()
     {
-        if (HebrewLanguageRadioButton?.IsChecked == true)
+        if (IsSelectedLanguage("Hebrew"))
             return 1;
 
-        if (RussianLanguageRadioButton?.IsChecked == true)
+        if (IsSelectedLanguage("Russian"))
             return 2;
 
         return 0;
@@ -441,7 +433,7 @@ public partial class MainWindow : Window
         if (!_uiReadyForLanguage)
             return;
 
-        if (EnglishLanguageRadioButton is null || HebrewLanguageRadioButton is null || RussianLanguageRadioButton is null)
+        if (LanguageComboBox is null)
             return;
         var index = GetSelectedLanguageIndex();
 
@@ -481,7 +473,7 @@ public partial class MainWindow : Window
 
         SetTextIfExists(HeaderTitleTextBlock, "Fast and Simple");
         SetTextIfExists(HeaderSubtitleTextBlock, "TAG Process document generation");
-        SetTextIfExists(LanguageLabelTextBlock, "Language");
+        SetTextIfExists(LanguageLabel, "Language");
 
         SetHeaderIfExists(StandardTabItem, "STANDARD");
         SetHeaderIfExists(AdvancedTabItem, "ADVANCED");
@@ -492,7 +484,7 @@ public partial class MainWindow : Window
         SetTextIfExists(AdvancedSettingsTitleTextBlock, "Advanced Settings");
         SetTextIfExists(ExecutionLogTitleTextBlock, "Execution Log");
 
-        SetContentIfExists(GenerateButton, "Generate DOCX + PDF");
+        SetContentIfExists(GenerateButton, "Generate DOCX");
         SetContentIfExists(OpenOutputButton, "Open Output");
         SetContentIfExists(LoadJsonButton, "Load JSON");
 
@@ -530,7 +522,7 @@ public partial class MainWindow : Window
 
         SetTextIfExists(HeaderTitleTextBlock, "\u0411\u044B\u0441\u0442\u0440\u043E \u0438 \u043F\u0440\u043E\u0441\u0442\u043E");
         SetTextIfExists(HeaderSubtitleTextBlock, "\u0421\u043E\u0437\u0434\u0430\u043D\u0438\u0435 \u0434\u043E\u043A\u0443\u043C\u0435\u043D\u0442\u043E\u0432 TAG Process");
-        SetTextIfExists(LanguageLabelTextBlock, "\u042F\u0437\u044B\u043A");
+        SetTextIfExists(LanguageLabel, "\u042F\u0437\u044B\u043A");
 
         SetHeaderIfExists(StandardTabItem, "\u0421\u0422\u0410\u041D\u0414\u0410\u0420\u0422");
         SetHeaderIfExists(AdvancedTabItem, "\u0420\u0410\u0421\u0428\u0418\u0420\u0415\u041D\u041D\u042B\u0419");
@@ -541,7 +533,7 @@ public partial class MainWindow : Window
         SetTextIfExists(AdvancedSettingsTitleTextBlock, "\u0420\u0430\u0441\u0448\u0438\u0440\u0435\u043D\u043D\u044B\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438");
         SetTextIfExists(ExecutionLogTitleTextBlock, "\u0416\u0443\u0440\u043D\u0430\u043B \u0432\u044B\u043F\u043E\u043B\u043D\u0435\u043D\u0438\u044F");
 
-        SetContentIfExists(GenerateButton, "\u0421\u043E\u0437\u0434\u0430\u0442\u044C DOCX + PDF");
+        SetContentIfExists(GenerateButton, "\u0421\u043E\u0437\u0434\u0430\u0442\u044C DOCX");
         SetContentIfExists(OpenOutputButton, "\u041E\u0442\u043A\u0440\u044B\u0442\u044C Output");
         SetContentIfExists(LoadJsonButton, "\u0417\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044C JSON");
 
@@ -579,7 +571,7 @@ public partial class MainWindow : Window
 
         SetTextIfExists(HeaderTitleTextBlock, "\u05DE\u05D4\u05D9\u05E8 \u05D5\u05E4\u05E9\u05D5\u05D8");
         SetTextIfExists(HeaderSubtitleTextBlock, "\u05D9\u05E6\u05D9\u05E8\u05EA \u05DE\u05E1\u05DE\u05DB\u05D9 TAG Process");
-        SetTextIfExists(LanguageLabelTextBlock, "\u05E9\u05E4\u05D4");
+        SetTextIfExists(LanguageLabel, "\u05E9\u05E4\u05D4");
 
         SetHeaderIfExists(StandardTabItem, "\u05E8\u05D2\u05D9\u05DC");
         SetHeaderIfExists(AdvancedTabItem, "\u05DE\u05EA\u05E7\u05D3\u05DD");
@@ -590,7 +582,7 @@ public partial class MainWindow : Window
         SetTextIfExists(AdvancedSettingsTitleTextBlock, "\u05D4\u05D2\u05D3\u05E8\u05D5\u05EA \u05DE\u05EA\u05E7\u05D3\u05DE\u05D5\u05EA");
         SetTextIfExists(ExecutionLogTitleTextBlock, "\u05D9\u05D5\u05DE\u05DF \u05E4\u05E2\u05D5\u05DC\u05D4");
 
-        SetContentIfExists(GenerateButton, "\u05E6\u05D5\u05E8 DOCX + PDF");
+        SetContentIfExists(GenerateButton, "\u05E6\u05D5\u05E8 DOCX");
         SetContentIfExists(OpenOutputButton, "\u05E4\u05EA\u05D7 Output");
         SetContentIfExists(LoadJsonButton, "\u05D8\u05E2\u05DF JSON");
 
@@ -696,7 +688,576 @@ public partial class MainWindow : Window
                 yield return descendant;
         }
     }
+
+
+// OFFICEBRIDGE_LANGUAGE_PATCH_START
+private void LanguageComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+{
+    if (LanguageComboBox?.SelectedItem is System.Windows.Controls.ComboBoxItem item &&
+        item.Tag is string language)
+    {
+        ApplyLanguage(language);
+    }
 }
+
+private void ApplyLanguage(string language)
+{
+    string projectData;
+    string languageLabel;
+    string projectNumber;
+    string productName;
+    string sigmaPn;
+    string customerPn;
+    string revision;
+    string unitsToProduce;
+    string projectManager;
+    string additionalRequirements;
+
+    switch (language)
+    {
+        case "Hebrew":
+            projectData = "\u05E0\u05EA\u05D5\u05E0\u05D9 \u05E4\u05E8\u05D5\u05D9\u05E7\u05D8";
+            languageLabel = "\u05E9\u05E4\u05D4";
+            projectNumber = "\u05DE\u05E1\u05E4\u05E8 \u05E4\u05E8\u05D5\u05D9\u05E7\u05D8";
+            productName = "\u05E9\u05DD \u05D4\u05DE\u05D5\u05E6\u05E8";
+            sigmaPn = "\u05DE\u05E7\u05F4\u05D8 Sigma";
+            customerPn = "\u05DE\u05E7\u05F4\u05D8 \u05DC\u05E7\u05D5\u05D7";
+            revision = "\u05DE\u05D4\u05D3\u05D5\u05E8\u05D4";
+            unitsToProduce = "\u05DB\u05DE\u05D5\u05EA";
+            projectManager = "\u05DE\u05E0\u05D4\u05DC \u05E4\u05E8\u05D5\u05D9\u05E7\u05D8";
+            additionalRequirements = "\u05D3\u05E8\u05D9\u05E9\u05D5\u05EA \u05E0\u05D5\u05E1\u05E4\u05D5\u05EA";
+            this.FlowDirection = System.Windows.FlowDirection.RightToLeft;
+            break;
+
+        case "Russian":
+            projectData = "\u0414\u0430\u043D\u043D\u044B\u0435 \u043F\u0440\u043E\u0435\u043A\u0442\u0430";
+            languageLabel = "\u042F\u0437\u044B\u043A";
+            projectNumber = "\u041D\u043E\u043C\u0435\u0440 \u043F\u0440\u043E\u0435\u043A\u0442\u0430";
+            productName = "\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u0438\u0437\u0434\u0435\u043B\u0438\u044F";
+            sigmaPn = "\u041D\u043E\u043C\u0435\u0440 Sigma";
+            customerPn = "\u041D\u043E\u043C\u0435\u0440 \u0437\u0430\u043A\u0430\u0437\u0447\u0438\u043A\u0430";
+            revision = "\u0420\u0435\u0432\u0438\u0437\u0438\u044F";
+            unitsToProduce = "\u041A\u043E\u043B\u0438\u0447\u0435\u0441\u0442\u0432\u043E";
+            projectManager = "\u0420\u0443\u043A\u043E\u0432\u043E\u0434\u0438\u0442\u0435\u043B\u044C \u043F\u0440\u043E\u0435\u043A\u0442\u0430";
+            additionalRequirements = "\u0414\u043E\u043F\u043E\u043B\u043D\u0438\u0442\u0435\u043B\u044C\u043D\u044B\u0435 \u0442\u0440\u0435\u0431\u043E\u0432\u0430\u043D\u0438\u044F";
+            this.FlowDirection = System.Windows.FlowDirection.LeftToRight;
+            break;
+
+        default:
+            projectData = "Project Data";
+            languageLabel = "Language";
+            projectNumber = "Project Number";
+            productName = "Product Name";
+            sigmaPn = "Sigma P/N";
+            customerPn = "Customer P/N";
+            revision = "Revision";
+            unitsToProduce = "Units to produce";
+            projectManager = "Project Manager";
+            additionalRequirements = "Additional requirements";
+            this.FlowDirection = System.Windows.FlowDirection.LeftToRight;
+            break;
+    }
+
+    SetTextBlockText("ProjectDataTitleTextBlock", projectData);
+    SetTextBlockText("LanguageLabel", languageLabel);
+    SetTextBlockText("ProjectNumberLabel", projectNumber);
+    SetTextBlockText("ProductNameLabel", productName);
+    SetTextBlockText("SigmaPnLabel", sigmaPn);
+    SetTextBlockText("CustomerPnLabel", customerPn);
+    SetTextBlockText("RevisionLabel", revision);
+    SetTextBlockText("UnitsToProduceLabel", unitsToProduce);
+    SetTextBlockText("ProjectManagerLabel", projectManager);
+
+    if (FindName("AdditionalRequirementsCheckBox") is System.Windows.Controls.CheckBox additionalRequirementsCheckBox)
+    {
+        additionalRequirementsCheckBox.Content = additionalRequirements;
+    }
+}
+
+private void SetTextBlockText(string name, string text)
+{
+    if (FindName(name) is System.Windows.Controls.TextBlock textBlock)
+    {
+        textBlock.Text = text;
+    }
+}
+// OFFICEBRIDGE_LANGUAGE_PATCH_END
+
+
+private bool IsSelectedLanguage(string language)
+{
+    return LanguageComboBox?.SelectedItem is System.Windows.Controls.ComboBoxItem item &&
+           item.Tag is string tag &&
+           tag == language;
+}
+
+
+// OFFICEBRIDGE_SAVE_JSON_ARCHIVE_PATCH_START
+private void SaveJsonToArchiveButton_Click(object sender, System.Windows.RoutedEventArgs e)
+{
+    try
+    {
+        var archiveDir = GetJsonArchiveFolder();
+        System.IO.Directory.CreateDirectory(archiveDir);
+
+        var fileName = BuildJsonArchiveFileName();
+        var filePath = System.IO.Path.Combine(archiveDir, fileName);
+
+        var data = BuildCurrentParametersJsonModel();
+
+        var options = new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        };
+
+        var json = JsonSerializer.Serialize(data, options);
+        System.IO.File.WriteAllText(filePath, json, System.Text.Encoding.UTF8);
+
+        AppendLog($"JSON saved to archive: {filePath}");
+    }
+    catch (Exception ex)
+    {
+        AppendLog($"ERROR saving JSON to archive: {ex.Message}");
+        System.Windows.MessageBox.Show(
+            ex.Message,
+            "Save JSON to Archive",
+            System.Windows.MessageBoxButton.OK,
+            System.Windows.MessageBoxImage.Error);
+    }
+}
+
+private Dictionary<string, object?> BuildCurrentParametersJsonModel()
+{
+    var result = new Dictionary<string, object?>
+    {
+        ["CreatedAt"] = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+
+        ["ProjectNumber"] = GetTextBoxValueForJson("ProjectNumberTextBox"),
+        ["ProductName"] = GetTextBoxValueForJson("TitleTextBox", "ProductNameTextBox"),
+        ["SigmaPn"] = GetTextBoxValueForJson("SigmaPnTextBox", "SigmaPNTextBox"),
+        ["CustomerPn"] = GetTextBoxValueForJson("CustomerPnTextBox", "CustomerPNTextBox"),
+        ["SerialNumber"] = GetTextBoxValueForJson("SerialNumberTextBox"),
+        ["Revision"] = GetTextBoxValueForJson("RevisionTextBox"),
+        ["ProductionQuantity"] = GetTextBoxValueForJson("ProductionQuantityTextBox", "UnitsToProduceTextBox"),
+        ["ProjectManager"] = GetTextBoxValueForJson("ProjectManagerTextBox"),
+        ["ClosureStatus"] = GetComboBoxValueForJson("ClosureStatusComboBox"),
+        ["AdditionalRequirements"] = GetTextBoxValueForJson("AdditionalRequirementsTextBox"),
+        ["SelectedLanguage"] = GetSelectedLanguageSafe()
+    };
+
+    AddCheckBoxValueForJson(result, "MechanicalDrawing", "MechanicalDrawingCheckBox");
+    AddCheckBoxValueForJson(result, "ElectricalDrawing", "ElectricalDrawingCheckBox");
+    AddCheckBoxValueForJson(result, "Specification", "SpecificationCheckBox");
+    AddCheckBoxValueForJson(result, "CableLugCrimpForceVerification", "CableLugCrimpForceVerificationCheckBox", "CableCrimpForceCheckBox", "CableCrimpForceVerificationCheckBox");
+    AddCheckBoxValueForJson(result, "FAI", "FaiCheckBox", "FAICheckBox");
+    AddCheckBoxValueForJson(result, "InspectorRequirement", "InspectorRequirementCheckBox");
+    AddCheckBoxValueForJson(result, "AutomaticTest", "AutomaticTestCheckBox", "AutomaticCheckCheckBox");
+    AddCheckBoxValueForJson(result, "AdditionalRequirementsEnabled", "AdditionalRequirementsCheckBox");
+
+    return result;
+}
+
+private string GetTextBoxValue(string name)
+{
+    if (FindName(name) is System.Windows.Controls.TextBox textBox)
+    {
+        return textBox.Text?.Trim() ?? string.Empty;
+    }
+
+    return string.Empty;
+}
+
+private void AddCheckBoxValueIfExists(Dictionary<string, object?> target, string controlName, string jsonName)
+{
+    if (FindName(controlName) is System.Windows.Controls.CheckBox checkBox)
+    {
+        target[jsonName] = checkBox.IsChecked == true;
+    }
+}
+
+private string GetSelectedLanguageSafe()
+{
+    if (FindName("LanguageComboBox") is System.Windows.Controls.ComboBox comboBox &&
+        comboBox.SelectedItem is System.Windows.Controls.ComboBoxItem item &&
+        item.Tag is string tag)
+    {
+        return tag;
+    }
+
+    return "English";
+}
+// OFFICEBRIDGE_SAVE_JSON_ARCHIVE_PATCH_END
+
+
+private string BuildJsonArchiveFileName()
+{
+    var projectNumber = MakeSafeFileNamePart(GetTextBoxValue("ProjectNumberTextBox"));
+    var productName = MakeSafeFileNamePart(GetTextBoxValue("TitleTextBox"));
+    var date = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+
+    if (string.IsNullOrWhiteSpace(projectNumber))
+    {
+        projectNumber = "NoProject";
+    }
+
+    if (string.IsNullOrWhiteSpace(productName))
+    {
+        productName = "NoProduct";
+    }
+
+    return $"{projectNumber}_{productName}_{date}.json";
+}
+
+private string GetJsonArchiveFolder()
+{
+    if (FindName("ArchiveFolderTextBox") is System.Windows.Controls.TextBox archiveFolderTextBox)
+    {
+        var archivePath = archiveFolderTextBox.Text?.Trim();
+
+        if (!string.IsNullOrWhiteSpace(archivePath))
+        {
+            return archivePath;
+        }
+    }
+
+    return System.IO.Path.Combine(AppContext.BaseDirectory, "Archive");
+}
+
+private string MakeSafeFileNamePart(string value)
+{
+    if (string.IsNullOrWhiteSpace(value))
+    {
+        return string.Empty;
+    }
+
+    var invalidChars = System.IO.Path.GetInvalidFileNameChars();
+    var safe = new string(value.Trim()
+        .Select(ch => invalidChars.Contains(ch) ? '_' : ch)
+        .ToArray());
+
+    safe = safe.Replace(" ", "_");
+
+    while (safe.Contains("__"))
+    {
+        safe = safe.Replace("__", "_");
+    }
+
+    return safe.Trim('_');
+}
+
+
+// OFFICEBRIDGE_LOAD_ARCHIVED_JSON_PATCH_START
+private void LoadJsonIntoCurrentUi(string json)
+{
+    using var document = JsonDocument.Parse(json);
+    var root = document.RootElement;
+
+    SetTextBoxFromJson(root, "ProjectNumber", "ProjectNumberTextBox");
+
+    // Product Name: support all old and new names.
+    SetTextBoxFromJson(root, "ProductName", "TitleTextBox", "ProductNameTextBox");
+    SetTextBoxFromJson(root, "Title", "TitleTextBox", "ProductNameTextBox");
+    SetTextBoxFromJson(root, "Name", "TitleTextBox", "ProductNameTextBox");
+    SetTextBoxFromJson(root, "Product", "TitleTextBox", "ProductNameTextBox");
+
+    SetTextBoxFromJson(root, "SigmaPn", "SigmaPnTextBox", "SigmaPNTextBox");
+    SetTextBoxFromJson(root, "SigmaPN", "SigmaPnTextBox", "SigmaPNTextBox");
+    SetTextBoxFromJson(root, "PartNumber", "SigmaPnTextBox", "SigmaPNTextBox");
+
+    SetTextBoxFromJson(root, "CustomerPn", "CustomerPnTextBox", "CustomerPNTextBox");
+    SetTextBoxFromJson(root, "SerialNumber", "SerialNumberTextBox");
+    SetTextBoxFromJson(root, "Serial", "SerialNumberTextBox");
+    SetTextBoxFromJson(root, "Revision", "RevisionTextBox");
+    SetTextBoxFromJson(root, "ProductionQuantity", "ProductionQuantityTextBox", "UnitsToProduceTextBox");
+    SetTextBoxFromJson(root, "UnitsToProduce", "ProductionQuantityTextBox", "UnitsToProduceTextBox");
+    SetTextBoxFromJson(root, "Quantity", "ProductionQuantityTextBox", "UnitsToProduceTextBox");
+    SetTextBoxFromJson(root, "ProjectManager", "ProjectManagerTextBox");
+    SetTextBoxFromJson(root, "Manager", "ProjectManagerTextBox");
+    SetTextBoxFromJson(root, "AdditionalRequirements", "AdditionalRequirementsTextBox");
+
+    SetComboBoxFromJson(root, "ClosureStatus", "ClosureStatusComboBox");
+
+    SetCheckBoxFromJson(root, "MechanicalDrawing", "MechanicalDrawingCheckBox");
+    SetCheckBoxFromJson(root, "ElectricalDrawing", "ElectricalDrawingCheckBox");
+    SetCheckBoxFromJson(root, "Specification", "SpecificationCheckBox");
+    SetCheckBoxFromJson(root, "CableLugCrimpForceVerification", "CableLugCrimpForceVerificationCheckBox", "CableCrimpForceCheckBox", "CableCrimpForceVerificationCheckBox");
+    SetCheckBoxFromJson(root, "CableCrimpForceCheck", "CableLugCrimpForceVerificationCheckBox", "CableCrimpForceCheckBox", "CableCrimpForceVerificationCheckBox");
+    SetCheckBoxFromJson(root, "FAI", "FaiCheckBox", "FAICheckBox");
+    SetCheckBoxFromJson(root, "InspectorRequirement", "InspectorRequirementCheckBox");
+    SetCheckBoxFromJson(root, "AutomaticTest", "AutomaticTestCheckBox", "AutomaticCheckCheckBox");
+    SetCheckBoxFromJson(root, "AutomaticCheck", "AutomaticTestCheckBox", "AutomaticCheckCheckBox");
+    SetCheckBoxFromJson(root, "AdditionalRequirementsEnabled", "AdditionalRequirementsCheckBox");
+
+    ApplyAdditionalRequirementsVisibility();
+}
+
+private void SetTextBoxValueIfJsonExists(JsonElement root, string jsonName, string controlName)
+{
+    if (!root.TryGetProperty(jsonName, out var value))
+    {
+        return;
+    }
+
+    if (FindName(controlName) is not System.Windows.Controls.TextBox textBox)
+    {
+        return;
+    }
+
+    textBox.Text = value.ValueKind switch
+    {
+        JsonValueKind.String => value.GetString() ?? string.Empty,
+        JsonValueKind.Number => value.ToString(),
+        JsonValueKind.True => "true",
+        JsonValueKind.False => "false",
+        _ => value.ToString()
+    };
+}
+
+private void SetCheckBoxValueIfJsonExists(JsonElement root, string jsonName, string controlName)
+{
+    if (!root.TryGetProperty(jsonName, out var value))
+    {
+        return;
+    }
+
+    if (FindName(controlName) is not System.Windows.Controls.CheckBox checkBox)
+    {
+        return;
+    }
+
+    checkBox.IsChecked = value.ValueKind switch
+    {
+        JsonValueKind.True => true,
+        JsonValueKind.False => false,
+        JsonValueKind.String => bool.TryParse(value.GetString(), out var parsed) && parsed,
+        JsonValueKind.Number => value.TryGetInt32(out var number) && number != 0,
+        _ => false
+    };
+}
+
+private string GetTextBoxValueByName(string controlName)
+{
+    if (FindName(controlName) is System.Windows.Controls.TextBox textBox)
+    {
+        return textBox.Text?.Trim() ?? string.Empty;
+    }
+
+    return string.Empty;
+}
+
+private void ApplyAdditionalRequirementsVisibility()
+{
+    if (FindName("AdditionalRequirementsCheckBox") is not System.Windows.Controls.CheckBox checkBox)
+    {
+        return;
+    }
+
+    if (FindName("AdditionalRequirementsTextBox") is System.Windows.Controls.TextBox textBox)
+    {
+        textBox.Visibility = checkBox.IsChecked == true
+            ? System.Windows.Visibility.Visible
+            : System.Windows.Visibility.Collapsed;
+    }
+}
+// OFFICEBRIDGE_LOAD_ARCHIVED_JSON_PATCH_END
+
+
+// OFFICEBRIDGE_JSON_EXPORT_HELPERS_START
+private string GetTextBoxValueAny(params string[] names)
+{
+    foreach (var name in names)
+    {
+        if (FindName(name) is System.Windows.Controls.TextBox textBox)
+        {
+            return textBox.Text?.Trim() ?? string.Empty;
+        }
+    }
+
+    return string.Empty;
+}
+
+private string GetComboBoxValueAny(params string[] names)
+{
+    foreach (var name in names)
+    {
+        if (FindName(name) is System.Windows.Controls.ComboBox comboBox)
+        {
+            if (comboBox.SelectedItem is System.Windows.Controls.ComboBoxItem item)
+            {
+                return item.Content?.ToString() ?? string.Empty;
+            }
+
+            return comboBox.Text?.Trim() ?? string.Empty;
+        }
+    }
+
+    return string.Empty;
+}
+
+private void AddCheckBoxValueAny(Dictionary<string, object?> target, string jsonName, params string[] controlNames)
+{
+    foreach (var controlName in controlNames)
+    {
+        if (FindName(controlName) is System.Windows.Controls.CheckBox checkBox)
+        {
+            target[jsonName] = checkBox.IsChecked == true;
+            return;
+        }
+    }
+
+    target[jsonName] = false;
+}
+// OFFICEBRIDGE_JSON_EXPORT_HELPERS_END
+
+
+// OFFICEBRIDGE_PRODUCT_NAME_JSON_HELPERS_START
+private string GetTextBoxValueForJson(params string[] names)
+{
+    foreach (var name in names)
+    {
+        if (FindName(name) is System.Windows.Controls.TextBox textBox)
+        {
+            return textBox.Text?.Trim() ?? string.Empty;
+        }
+    }
+
+    return string.Empty;
+}
+
+private string GetComboBoxValueForJson(params string[] names)
+{
+    foreach (var name in names)
+    {
+        if (FindName(name) is System.Windows.Controls.ComboBox comboBox)
+        {
+            if (comboBox.SelectedItem is System.Windows.Controls.ComboBoxItem item)
+            {
+                return item.Content?.ToString() ?? string.Empty;
+            }
+
+            return comboBox.Text?.Trim() ?? string.Empty;
+        }
+    }
+
+    return string.Empty;
+}
+
+private void AddCheckBoxValueForJson(Dictionary<string, object?> target, string jsonName, params string[] controlNames)
+{
+    foreach (var controlName in controlNames)
+    {
+        if (FindName(controlName) is System.Windows.Controls.CheckBox checkBox)
+        {
+            target[jsonName] = checkBox.IsChecked == true;
+            return;
+        }
+    }
+
+    target[jsonName] = false;
+}
+
+private void SetTextBoxFromJson(JsonElement root, string jsonName, params string[] controlNames)
+{
+    if (!root.TryGetProperty(jsonName, out var value))
+    {
+        return;
+    }
+
+    var text = value.ValueKind switch
+    {
+        JsonValueKind.String => value.GetString() ?? string.Empty,
+        JsonValueKind.Number => value.ToString(),
+        JsonValueKind.True => "true",
+        JsonValueKind.False => "false",
+        _ => value.ToString()
+    };
+
+    foreach (var controlName in controlNames)
+    {
+        if (FindName(controlName) is System.Windows.Controls.TextBox textBox)
+        {
+            textBox.Text = text;
+            return;
+        }
+    }
+}
+
+private void SetComboBoxFromJson(JsonElement root, string jsonName, params string[] controlNames)
+{
+    if (!root.TryGetProperty(jsonName, out var value))
+    {
+        return;
+    }
+
+    var text = value.ValueKind == JsonValueKind.String
+        ? value.GetString()
+        : value.ToString();
+
+    if (string.IsNullOrWhiteSpace(text))
+    {
+        return;
+    }
+
+    foreach (var controlName in controlNames)
+    {
+        if (FindName(controlName) is System.Windows.Controls.ComboBox comboBox)
+        {
+            foreach (var item in comboBox.Items)
+            {
+                if (item is System.Windows.Controls.ComboBoxItem comboBoxItem &&
+                    string.Equals(comboBoxItem.Content?.ToString(), text, StringComparison.OrdinalIgnoreCase))
+                {
+                    comboBox.SelectedItem = comboBoxItem;
+                    return;
+                }
+            }
+
+            comboBox.Text = text;
+            return;
+        }
+    }
+}
+
+private void SetCheckBoxFromJson(JsonElement root, string jsonName, params string[] controlNames)
+{
+    if (!root.TryGetProperty(jsonName, out var value))
+    {
+        return;
+    }
+
+    var isChecked = value.ValueKind switch
+    {
+        JsonValueKind.True => true,
+        JsonValueKind.False => false,
+        JsonValueKind.String => bool.TryParse(value.GetString(), out var parsed) && parsed,
+        JsonValueKind.Number => value.TryGetInt32(out var number) && number != 0,
+        _ => false
+    };
+
+    foreach (var controlName in controlNames)
+    {
+        if (FindName(controlName) is System.Windows.Controls.CheckBox checkBox)
+        {
+            checkBox.IsChecked = isChecked;
+            return;
+        }
+    }
+}
+// OFFICEBRIDGE_PRODUCT_NAME_JSON_HELPERS_END
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

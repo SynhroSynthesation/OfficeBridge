@@ -42,10 +42,22 @@ public sealed class DocumentWorkflowService
 
         if (_officeProvider.IsAvailable())
         {
-            await _officeProvider.ExportToPdfAsync(
-                outputDocx,
-                outputPdf,
-                cancellationToken);
+            try
+            {
+                if (_officeProvider.IsAvailable())
+                {
+                    await _officeProvider.ExportToPdfAsync(
+                        outputDocx,
+                        outputPdf,
+                        cancellationToken);
+                }
+            }
+            catch
+            {
+                // PDF export is optional.
+                // DOCX generation must remain successful even if LibreOffice is missing
+                // or PDF conversion fails.
+            }
         }
 
         if (!string.IsNullOrWhiteSpace(targetFolderId))

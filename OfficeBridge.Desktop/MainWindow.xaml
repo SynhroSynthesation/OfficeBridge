@@ -1,4 +1,4 @@
-﻿<Window x:Class="OfficeBridge.Desktop.MainWindow"
+﻿<Window Icon="Assets/OfficeBridge.ico" x:Class="OfficeBridge.Desktop.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -11,9 +11,9 @@
         MinWidth="980"
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized"
-        Background="#F4F7FB">
-
+        Background="#F4F7FB" xmlns:controls="clr-namespace:System.Windows.Controls;assembly=PresentationFramework">
     <Window.Resources>
+        <controls:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <SolidColorBrush x:Key="PrimaryBrush" Color="#1F4E79"/>
         <SolidColorBrush x:Key="AccentBrush" Color="#2E75B6"/>
         <SolidColorBrush x:Key="CardBrush" Color="White"/>
@@ -149,35 +149,6 @@
                                        Foreground="#DCE6F2"
                                        Margin="0,4,0,0"/>
                         </StackPanel>
-
-                        <StackPanel DockPanel.Dock="Right"
-                                    HorizontalAlignment="Right"
-                                    VerticalAlignment="Center"
-                                    Width="220">
-                            <TextBlock x:Name="LanguageLabelTextBlock"
-                                       Text="Language"
-                                       Foreground="#DCE6F2"
-                                       FontWeight="SemiBold"
-                                       Margin="0,0,0,4"/>
-                            <UniformGrid Columns="3">
-                                <RadioButton x:Name="EnglishLanguageRadioButton"
-                                             Content="EN"
-                                             GroupName="LanguageSwitch"
-                                             IsChecked="True"
-                                             Style="{StaticResource LanguageSwitchRadioButtonStyle}"
-                                             Checked="LanguageRadioButton_Checked"/>
-                                <RadioButton x:Name="HebrewLanguageRadioButton"
-                                             Content="HE"
-                                             GroupName="LanguageSwitch"
-                                             Style="{StaticResource LanguageSwitchRadioButtonStyle}"
-                                             Checked="LanguageRadioButton_Checked"/>
-                                <RadioButton x:Name="RussianLanguageRadioButton"
-                                             Content="RU"
-                                             GroupName="LanguageSwitch"
-                                             Style="{StaticResource LanguageSwitchRadioButtonStyle}"
-                                             Checked="LanguageRadioButton_Checked"/>
-                            </UniformGrid>
-                        </StackPanel>
                     </DockPanel>
                 </DockPanel>
             </Border>
@@ -213,19 +184,39 @@
                                 <StackPanel Grid.Column="0">
                                     <TextBlock x:Name="ProjectDataTitleTextBlock" Text="Project Data" Style="{StaticResource SectionTitleStyle}"/>
 
-                                    <TextBlock Text="Title" Style="{StaticResource FieldLabelStyle}"/>
-                                    <TextBox x:Name="TitleTextBox" Style="{StaticResource InputTextBoxStyle}"/>
+                                    <StackPanel x:Name="LanguageSwitchPanel"
+                                                Orientation="Horizontal"
+                                                Margin="0,0,0,12">
+                                        <TextBlock x:Name="LanguageLabel"
+                                                   Text="Language"
+                                                   Style="{StaticResource FieldLabelStyle}"
+                                                   VerticalAlignment="Center"
+                                                   Margin="0,0,8,0"/>
+                                        <ComboBox x:Name="LanguageComboBox"
+                                                  Width="90"
+                                                  SelectedIndex="0"
+                                                  SelectionChanged="LanguageComboBox_SelectionChanged">
+                                            <ComboBoxItem Content="EN" Tag="English"/>
+                                            <ComboBoxItem Content="HE" Tag="Hebrew"/>
+                                            <ComboBoxItem Content="RU" Tag="Russian"/>
+                                        </ComboBox>
+                                    </StackPanel>
 
-                                    <TextBlock Text="Project Number" Style="{StaticResource FieldLabelStyle}"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                    </StackPanel>
+                                    <TextBlock x:Name="ProjectNumberLabel" Text="Project Number" Style="{StaticResource FieldLabelStyle}"/>
                                     <TextBox x:Name="ProjectNumberTextBox" Style="{StaticResource InputTextBoxStyle}"/>
 
-                                    <TextBlock Text="Sigma P/N" Style="{StaticResource FieldLabelStyle}"/>
+                                    <TextBlock x:Name="ProductNameLabel" Text="Product Name" Style="{StaticResource FieldLabelStyle}"/>
+                                    <TextBox x:Name="TitleTextBox" Style="{StaticResource InputTextBoxStyle}"/>
+
+                                    <TextBlock x:Name="SigmaPnLabel" Text="Sigma P/N" Style="{StaticResource FieldLabelStyle}"/>
                                     <TextBox x:Name="SigmaPnTextBox" Style="{StaticResource InputTextBoxStyle}"/>
 
                                     <TextBlock Text="Serial Number" Style="{StaticResource FieldLabelStyle}"/>
                                     <TextBox x:Name="SerialNumberTextBox" Style="{StaticResource InputTextBoxStyle}"/>
 
-                                    <TextBlock Text="Project Manager" Style="{StaticResource FieldLabelStyle}"/>
+                                    <TextBlock x:Name="ProjectManagerLabel" Text="Project Manager" Style="{StaticResource FieldLabelStyle}"/>
                                     <TextBox x:Name="ProjectManagerTextBox" Style="{StaticResource InputTextBoxStyle}"/>
 
                                     <TextBlock Text="Production Quantity" Style="{StaticResource FieldLabelStyle}"/>
@@ -235,7 +226,7 @@
                                 <StackPanel Grid.Column="2">
                                     <TextBlock x:Name="DocumentOptionsTitleTextBlock" Text="Document Options" Style="{StaticResource SectionTitleStyle}"/>
 
-                                    <TextBlock Text="Revision" Style="{StaticResource FieldLabelStyle}"/>
+                                    <TextBlock x:Name="RevisionLabel" Text="Revision" Style="{StaticResource FieldLabelStyle}"/>
                                     <TextBox x:Name="RevisionTextBox" Style="{StaticResource InputTextBoxStyle}"/>
 
                                     <TextBlock Text="Closure Status" Style="{StaticResource FieldLabelStyle}"/>
@@ -282,8 +273,20 @@
                                                           Content="Automatic Test"
                                                           Style="{StaticResource CheckBoxStyleSoft}"/>
                                                 <CheckBox x:Name="AdditionalRequirementsCheckBox"
-                                                          Content="Additional Requirements"
+                                                          Content="Additional requirements"
                                                           Style="{StaticResource CheckBoxStyleSoft}"/>
+
+<TextBlock Text="Additional requirements"
+           Margin="0,8,0,4"
+           Visibility="{Binding IsChecked, ElementName=AdditionalRequirementsCheckBox, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+<TextBox x:Name="AdditionalRequirementsTextBox"
+         MinHeight="80"
+         TextWrapping="Wrap"
+         AcceptsReturn="True"
+         VerticalScrollBarVisibility="Auto"
+         Margin="0,0,0,8"
+         Visibility="{Binding IsChecked, ElementName=AdditionalRequirementsCheckBox, Converter={StaticResource BooleanToVisibilityConverter}}" />
                                             </StackPanel>
                                         </Grid>
                                     </GroupBox>
@@ -373,19 +376,41 @@
                                 <TextBox x:Name="ArchiveFolderTextBox"
                                          Style="{StaticResource InputTextBoxStyle}"/>
                             </DockPanel>
+                            <StackPanel Orientation="Horizontal"
+                                        Margin="0,18,0,0"
+                                        VerticalAlignment="Top">
 
-                            <WrapPanel Margin="0,10,0,0">
                                 <Button x:Name="LoadJsonButton"
                                         Content="Load JSON"
                                         Width="140"
+                                        Height="42"
+                                        Padding="16,0"
+                                        Margin="0,0,8,0"
+                                        VerticalAlignment="Top"
                                         Style="{StaticResource SecondaryButtonStyle}"
                                         Click="LoadJsonButton_Click"/>
 
-                                <Button Content="Open Archive"
+                                <Button x:Name="SaveJsonToArchiveButton"
+                                        Content="Save JSON to Archive"
+                                        Width="170"
+                                        Height="42"
+                                        Padding="16,0"
+                                        Margin="8,0,8,0"
+                                        VerticalAlignment="Top"
+                                        Style="{StaticResource PrimaryButtonStyle}"
+                                        Click="SaveJsonToArchiveButton_Click"/>
+
+                                <Button x:Name="OpenArchiveButton"
+                                        Content="Open Archive"
                                         Width="140"
+                                        Height="42"
+                                        Padding="16,0"
+                                        Margin="8,0,0,0"
+                                        VerticalAlignment="Top"
                                         Style="{StaticResource SecondaryButtonStyle}"
                                         Click="OpenArchiveButton_Click"/>
-                            </WrapPanel>
+
+                            </StackPanel>
 
                             <TextBlock Text="Advanced mode is intended for loading data from JSON and changing archive storage location."
                                        Foreground="{StaticResource MutedBrush}"
@@ -438,6 +463,26 @@
         </Grid>
     </ScrollViewer>
 </Window>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

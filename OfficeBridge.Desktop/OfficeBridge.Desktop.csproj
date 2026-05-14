@@ -17,6 +17,16 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationIcon>Assets\OfficeBridge.ico</ApplicationIcon>
   </PropertyGroup>
 
+
+  <ItemGroup>
+    <Resource Include="Assets\OfficeBridge.ico" />
+    <Content Include="..\Templates\**\*">
+      <Link>Templates\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 </Project>
+
