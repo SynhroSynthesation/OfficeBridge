@@ -72,10 +72,10 @@ InitializeDefaults();
         MechanicalDrawingCheckBox.IsChecked = true;
         ElectricalDrawingCheckBox.IsChecked = true;
         SpecificationCheckBox.IsChecked = true;
-        CableCrimpCheckBox.IsChecked = false;
+        PullTestCheckBox.IsChecked = false;
         FaiCheckBox.IsChecked = false;
         InspectorRequirementCheckBox.IsChecked = false;
-        AutomaticTestCheckBox.IsChecked = true;
+        AutomaticCheckCheckBox.IsChecked = true;
         AdditionalRequirementsCheckBox.IsChecked = false;
 
         AppendLog("Application initialized.");
@@ -176,11 +176,19 @@ InitializeDefaults();
             IncludeMechanicalDrawing = MechanicalDrawingCheckBox.IsChecked == true,
             IncludeElectricalDrawing = ElectricalDrawingCheckBox.IsChecked == true,
             IncludeSpecification = SpecificationCheckBox.IsChecked == true,
-            IncludeCableCrimpVerification = CableCrimpCheckBox.IsChecked == true,
+            IncludePartList = SpecificationCheckBox.IsChecked == true,
+            IncludeDatasheets = DatasheetsCheckBox.IsChecked == true,
+            IncludePictures = PicturesCheckBox.IsChecked == true,
+            IncludeCableCrimpVerification = PullTestCheckBox.IsChecked == true,
+            IncludePullTest = PullTestCheckBox.IsChecked == true,
             IncludeFai = FaiCheckBox.IsChecked == true,
+            IncludeFai2 = Fai2CheckBox.IsChecked == true,
+            IncludeFai3 = Fai3CheckBox.IsChecked == true,
             IncludeInspectorRequirement = InspectorRequirementCheckBox.IsChecked == true,
-            IncludeAutomaticTest = AutomaticTestCheckBox.IsChecked == true,
-            IncludeAdditionalRequirements = AdditionalRequirementsCheckBox.IsChecked == true
+            IncludeAutomaticTest = AutomaticCheckCheckBox.IsChecked == true,
+            IncludeExternalElectricalTest = ExternalElectricalTestCheckBox.IsChecked == true,
+            IncludeAdditionalRequirements = AdditionalRequirementsCheckBox.IsChecked == true,
+            AdditionalRequirementsText = GetAdditionalRequirementsTextForModel()
         };
     }
 
@@ -843,6 +851,9 @@ private Dictionary<string, object?> BuildCurrentParametersJsonModel()
         ["ProjectManager"] = GetTextBoxValueForJson("ProjectManagerTextBox"),
         ["ClosureStatus"] = GetComboBoxValueForJson("ClosureStatusComboBox"),
         ["AdditionalRequirements"] = GetTextBoxValueForJson("AdditionalRequirementsTextBox"),
+        ["FAIText"] = GetTextBoxValueForJson("FaiTextBox"),
+        ["FAI2Text"] = GetTextBoxValueForJson("Fai2TextBox"),
+        ["FAI3Text"] = GetTextBoxValueForJson("Fai3TextBox"),
         ["SelectedLanguage"] = GetSelectedLanguageSafe()
     };
 
@@ -852,8 +863,15 @@ private Dictionary<string, object?> BuildCurrentParametersJsonModel()
     AddCheckBoxValueForJson(result, "CableLugCrimpForceVerification", "CableLugCrimpForceVerificationCheckBox", "CableCrimpForceCheckBox", "CableCrimpForceVerificationCheckBox");
     AddCheckBoxValueForJson(result, "FAI", "FaiCheckBox", "FAICheckBox");
     AddCheckBoxValueForJson(result, "InspectorRequirement", "InspectorRequirementCheckBox");
-    AddCheckBoxValueForJson(result, "AutomaticTest", "AutomaticTestCheckBox", "AutomaticCheckCheckBox");
+    AddCheckBoxValueForJson(result, "AutomaticTest", "AutomaticCheckCheckBox", "AutomaticCheckCheckBox");
+    AddCheckBoxValueForJson(result, "ExternalElectricalTest", "ExternalElectricalTestCheckBox");
     AddCheckBoxValueForJson(result, "AdditionalRequirementsEnabled", "AdditionalRequirementsCheckBox");
+    AddCheckBoxValueForJson(result, "PartList", "PartListCheckBox", "SpecificationCheckBox");
+    AddCheckBoxValueForJson(result, "PullTest", "PullTestCheckBox", "CableCrimpForceCheckBox", "CableLugCrimpForceVerificationCheckBox", "CableCrimpForceVerificationCheckBox");
+    AddCheckBoxValueForJson(result, "DATASHEETS", "DatasheetsCheckBox");
+    AddCheckBoxValueForJson(result, "Pictures", "PicturesCheckBox");
+    AddCheckBoxValueForJson(result, "FAI2", "Fai2CheckBox");
+    AddCheckBoxValueForJson(result, "FAI3", "Fai3CheckBox");
 
     return result;
 }
@@ -975,6 +993,9 @@ private void LoadJsonIntoCurrentUi(string json)
     SetTextBoxFromJson(root, "ProjectManager", "ProjectManagerTextBox");
     SetTextBoxFromJson(root, "Manager", "ProjectManagerTextBox");
     SetTextBoxFromJson(root, "AdditionalRequirements", "AdditionalRequirementsTextBox");
+    SetTextBoxFromJson(root, "FAIText", "FaiTextBox");
+    SetTextBoxFromJson(root, "FAI2Text", "Fai2TextBox");
+    SetTextBoxFromJson(root, "FAI3Text", "Fai3TextBox");
 
     SetComboBoxFromJson(root, "ClosureStatus", "ClosureStatusComboBox");
 
@@ -985,9 +1006,18 @@ private void LoadJsonIntoCurrentUi(string json)
     SetCheckBoxFromJson(root, "CableCrimpForceCheck", "CableLugCrimpForceVerificationCheckBox", "CableCrimpForceCheckBox", "CableCrimpForceVerificationCheckBox");
     SetCheckBoxFromJson(root, "FAI", "FaiCheckBox", "FAICheckBox");
     SetCheckBoxFromJson(root, "InspectorRequirement", "InspectorRequirementCheckBox");
-    SetCheckBoxFromJson(root, "AutomaticTest", "AutomaticTestCheckBox", "AutomaticCheckCheckBox");
-    SetCheckBoxFromJson(root, "AutomaticCheck", "AutomaticTestCheckBox", "AutomaticCheckCheckBox");
+    SetCheckBoxFromJson(root, "AutomaticTest", "AutomaticCheckCheckBox", "AutomaticCheckCheckBox");
+    SetCheckBoxFromJson(root, "ExternalElectricalTest", "ExternalElectricalTestCheckBox");
+    SetCheckBoxFromJson(root, "AutomaticCheck", "AutomaticCheckCheckBox", "AutomaticCheckCheckBox");
     SetCheckBoxFromJson(root, "AdditionalRequirementsEnabled", "AdditionalRequirementsCheckBox");
+    SetCheckBoxFromJson(root, "PartList", "PartListCheckBox", "SpecificationCheckBox");
+    SetCheckBoxFromJson(root, "Specification", "PartListCheckBox", "SpecificationCheckBox");
+    SetCheckBoxFromJson(root, "PullTest", "PullTestCheckBox", "CableCrimpForceCheckBox", "CableLugCrimpForceVerificationCheckBox", "CableCrimpForceVerificationCheckBox");
+    SetCheckBoxFromJson(root, "CableLugCrimpForceVerification", "PullTestCheckBox", "CableCrimpForceCheckBox", "CableLugCrimpForceVerificationCheckBox", "CableCrimpForceVerificationCheckBox");
+    SetCheckBoxFromJson(root, "DATASHEETS", "DatasheetsCheckBox");
+    SetCheckBoxFromJson(root, "Pictures", "PicturesCheckBox");
+    SetCheckBoxFromJson(root, "FAI2", "Fai2CheckBox");
+    SetCheckBoxFromJson(root, "FAI3", "Fai3CheckBox");
 
     ApplyAdditionalRequirementsVisibility();
 }
@@ -1245,7 +1275,44 @@ private void SetCheckBoxFromJson(JsonElement root, string jsonName, params strin
     }
 }
 // OFFICEBRIDGE_PRODUCT_NAME_JSON_HELPERS_END
+
+
+private void AdditionalRequirementsCheckBox_Changed(object sender, RoutedEventArgs e)
+{
+    var isVisible = AdditionalRequirementsCheckBox?.IsChecked == true
+        ? Visibility.Visible
+        : Visibility.Collapsed;
+
+    if (FindName("AdditionalRequirementsTextLabel") is System.Windows.Controls.TextBlock label)
+    {
+        label.Visibility = isVisible;
+    }
+
+    if (FindName("AdditionalRequirementsTextBox") is System.Windows.Controls.TextBox textBox)
+    {
+        textBox.Visibility = isVisible;
+    }
 }
+
+
+private string GetAdditionalRequirementsTextForModel()
+{
+    if (FindName("AdditionalRequirementsTextBox") is System.Windows.Controls.TextBox textBox)
+    {
+        return textBox.Text?.Trim() ?? string.Empty;
+    }
+
+    return string.Empty;
+}
+}
+
+
+
+
+
+
+
+
 
 
 

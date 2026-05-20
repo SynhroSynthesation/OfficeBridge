@@ -1,4 +1,4 @@
-namespace OfficeBridge.Core.Models;
+﻿namespace OfficeBridge.Core.Models;
 
 public sealed class TagProcessModel
 {
@@ -22,4 +22,15 @@ public sealed class TagProcessModel
     public bool IncludeAdditionalRequirements { get; set; }
 
     public string AdditionalRequirementsText { get; set; } = string.Empty;
+
+    public bool IncludePartList { get; set; }
+    public bool IncludeDatasheets { get; set; }
+    public bool IncludePictures { get; set; }
+
+    public bool IncludePullTest { get; set; }
+    public bool IncludeFai2 { get; set; }
+    public bool IncludeFai3 { get; set; }
+    public bool IncludeExternalElectricalTest { get; set; }
+
 }
+

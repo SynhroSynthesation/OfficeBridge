@@ -237,59 +237,104 @@
                                         <ComboBoxItem Content="PARTIAL"/>
                                     </ComboBox>
 
-                                    <GroupBox Header="Document Package"
-                                              Margin="0,10,0,0"
-                                              Padding="10">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="1*"/>
-                                                <ColumnDefinition Width="18"/>
-                                                <ColumnDefinition Width="1*"/>
-                                            </Grid.ColumnDefinitions>
+                                                                        <Grid Margin="0,10,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="1*"/>
+                                            <ColumnDefinition Width="24"/>
+                                            <ColumnDefinition Width="1*"/>
+                                        </Grid.ColumnDefinitions>
 
-                                            <StackPanel Grid.Column="0">
+                                        <GroupBox Grid.Column="0"
+                                                  Header="Document Package"
+                                                  Padding="12"
+                                                  BorderBrush="#B7C7D9"
+                                                  BorderThickness="1.5">
+                                            <StackPanel>
                                                 <CheckBox x:Name="MechanicalDrawingCheckBox"
                                                           Content="Mechanical Drawing"
-                                                          Style="{StaticResource CheckBoxStyleSoft}"/>
+                                                          IsChecked="True"
+                                                          Margin="0,4,0,0"/>
+
                                                 <CheckBox x:Name="ElectricalDrawingCheckBox"
                                                           Content="Electrical Drawing"
-                                                          Style="{StaticResource CheckBoxStyleSoft}"/>
-                                                <CheckBox x:Name="SpecificationCheckBox"
-                                                          Content="Specification"
-                                                          Style="{StaticResource CheckBoxStyleSoft}"/>
-                                                <CheckBox x:Name="CableCrimpCheckBox"
-                                                          Content="Cable Lug Crimp Force Verification"
-                                                          Style="{StaticResource CheckBoxStyleSoft}"/>
-                                            </StackPanel>
+                                                          IsChecked="True"
+                                                          Margin="0,4,0,0"/>
 
-                                            <StackPanel Grid.Column="2">
+                                                <CheckBox x:Name="SpecificationCheckBox"
+                                                          Content="PART LIST"
+                                                          IsChecked="True"
+                                                          Margin="0,4,0,0"/>
+
+                                                <CheckBox x:Name="DatasheetsCheckBox"
+                                                          Content="DATASHEETS"
+                                                          Margin="0,4,0,0"/>
+
+                                                <CheckBox x:Name="PicturesCheckBox"
+                                                          Content="Pictures"
+                                                          Margin="0,4,0,0"/>
+                                            </StackPanel>
+                                        </GroupBox>
+
+                                        <Border Grid.Column="1"
+                                                Width="1"
+                                                Margin="0,4,0,4"
+                                                Background="#D7E3F0"/>
+
+                                        <GroupBox Grid.Column="2"
+                                                  Header="Requirement"
+                                                  Padding="12"
+                                                  BorderBrush="#8FB3D9"
+                                                  BorderThickness="2"
+                                                  Background="#FAFCFF">
+                                            <StackPanel>
+                                                <CheckBox x:Name="PullTestCheckBox"
+                                                          Content="PULL TEST"
+                                                          Margin="0,4,0,0"/>
+
                                                 <CheckBox x:Name="FaiCheckBox"
                                                           Content="FAI"
-                                                          Style="{StaticResource CheckBoxStyleSoft}"/>
+                                                          Margin="0,4,0,0"/>
+
+                                                <CheckBox x:Name="Fai2CheckBox"
+                                                          Content="FAI2"
+                                                          Margin="0,4,0,0"/>
+
+                                                <CheckBox x:Name="Fai3CheckBox"
+                                                          Content="FAI3"
+                                                          Margin="0,4,0,0"/>
+
                                                 <CheckBox x:Name="InspectorRequirementCheckBox"
                                                           Content="Inspector Requirement"
-                                                          Style="{StaticResource CheckBoxStyleSoft}"/>
-                                                <CheckBox x:Name="AutomaticTestCheckBox"
+                                                          Margin="0,4,0,0"/>
+
+                                                <CheckBox x:Name="AutomaticCheckCheckBox"
                                                           Content="Automatic Test"
-                                                          Style="{StaticResource CheckBoxStyleSoft}"/>
+                                                          IsChecked="True"
+                                                          Margin="0,4,0,0"/>
+
+                                                <CheckBox x:Name="ExternalElectricalTestCheckBox"
+                                                          Content="External Electrical TEST"
+                                                          Margin="0,4,0,0"/>
+
                                                 <CheckBox x:Name="AdditionalRequirementsCheckBox"
                                                           Content="Additional requirements"
-                                                          Style="{StaticResource CheckBoxStyleSoft}"/>
+                                                          Margin="0,4,0,0" Checked="AdditionalRequirementsCheckBox_Changed" Unchecked="AdditionalRequirementsCheckBox_Changed"/>
 
-<TextBlock Text="Additional requirements"
-           Margin="0,8,0,4"
-           Visibility="{Binding IsChecked, ElementName=AdditionalRequirementsCheckBox, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                                <TextBlock x:Name="AdditionalRequirementsTextLabel"
+                                                           Text="Additional requirements text"
+                                                           Margin="22,8,0,0"
+                                                           Visibility="Collapsed"/>
 
-<TextBox x:Name="AdditionalRequirementsTextBox"
-         MinHeight="80"
-         TextWrapping="Wrap"
-         AcceptsReturn="True"
-         VerticalScrollBarVisibility="Auto"
-         Margin="0,0,0,8"
-         Visibility="{Binding IsChecked, ElementName=AdditionalRequirementsCheckBox, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                                <TextBox x:Name="AdditionalRequirementsTextBox"
+                                                         MinHeight="75"
+                                                         Margin="22,4,0,0"
+                                                         TextWrapping="Wrap"
+                                                         AcceptsReturn="True"
+                                                         VerticalScrollBarVisibility="Auto"
+                                                         Visibility="Collapsed"/>
                                             </StackPanel>
-                                        </Grid>
-                                    </GroupBox>
+                                        </GroupBox>
+                                    </Grid>
                                 </StackPanel>
                             </Grid>
                         </Border>
@@ -463,6 +508,13 @@
         </Grid>
     </ScrollViewer>
 </Window>
+
+
+
+
+
+
+
 
 
 
