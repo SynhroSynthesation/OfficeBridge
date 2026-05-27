@@ -37,6 +37,14 @@ public partial class MainWindow : Window
         public string DefaultArchiveFolder { get; set; } = "Archive";
     }
 
+    private sealed class LastUsedPathsSettings
+    {
+        public string TemplatePath { get; set; } = string.Empty;
+        public string JsonPath { get; set; } = string.Empty;
+        public string OutputFolder { get; set; } = string.Empty;
+        public string ArchiveFolder { get; set; } = string.Empty;
+    }
+
         private DesktopAppSettings _settings = new();
     private bool _uiReadyForLanguage;
 
@@ -45,6 +53,8 @@ public partial class MainWindow : Window
         InitializeComponent();
             ApplyLanguage("English");
 InitializeDefaults();
+        LoadLastUsedPaths();
+        Closing += MainWindow_Closing;
     }
 
     private void InitializeDefaults()
@@ -1304,7 +1314,111 @@ private string GetAdditionalRequirementsTextForModel()
 
     return string.Empty;
 }
+
+
+// OFFICEBRIDGE_LAST_USED_PATHS_START
+private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
+{
+    SaveLastUsedPaths();
 }
+
+private static string GetLastUsedPathsSettingsPath()
+{
+    var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+    var dir = System.IO.Path.Combine(appData, "OfficeBridge");
+
+    System.IO.Directory.CreateDirectory(dir);
+
+    return System.IO.Path.Combine(dir, "user.paths.json");
+}
+
+private void LoadLastUsedPaths()
+{
+    try
+    {
+        var path = GetLastUsedPathsSettingsPath();
+
+        if (!System.IO.File.Exists(path))
+        {
+            AppendLog("No saved user paths found. Using default paths.");
+            return;
+        }
+
+        var json = System.IO.File.ReadAllText(path, System.Text.Encoding.UTF8);
+
+        var data = JsonSerializer.Deserialize<LastUsedPathsSettings>(
+            json,
+            new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+        if (data is null)
+        {
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(data.TemplatePath))
+        {
+            TemplatePathTextBox.Text = data.TemplatePath;
+        }
+
+        if (!string.IsNullOrWhiteSpace(data.JsonPath))
+        {
+            JsonPathTextBox.Text = data.JsonPath;
+        }
+
+        if (!string.IsNullOrWhiteSpace(data.OutputFolder))
+        {
+            OutputFolderTextBox.Text = data.OutputFolder;
+        }
+
+        if (!string.IsNullOrWhiteSpace(data.ArchiveFolder))
+        {
+            ArchiveFolderTextBox.Text = data.ArchiveFolder;
+        }
+
+        AppendLog($"Loaded saved user paths: {path}");
+    }
+    catch (Exception ex)
+    {
+        AppendLog($"WARNING: Could not load saved user paths: {ex.Message}");
+    }
+}
+
+private void SaveLastUsedPaths()
+{
+    try
+    {
+        var data = new LastUsedPathsSettings
+        {
+            TemplatePath = TemplatePathTextBox.Text?.Trim() ?? string.Empty,
+            JsonPath = JsonPathTextBox.Text?.Trim() ?? string.Empty,
+            OutputFolder = OutputFolderTextBox.Text?.Trim() ?? string.Empty,
+            ArchiveFolder = ArchiveFolderTextBox.Text?.Trim() ?? string.Empty
+        };
+
+        var path = GetLastUsedPathsSettingsPath();
+
+        var json = JsonSerializer.Serialize(
+            data,
+            new JsonSerializerOptions
+            {
+                WriteIndented = true
+            });
+
+        System.IO.File.WriteAllText(path, json, System.Text.Encoding.UTF8);
+
+        AppendLog($"Saved user paths: {path}");
+    }
+    catch (Exception ex)
+    {
+        AppendLog($"WARNING: Could not save user paths: {ex.Message}");
+    }
+}
+// OFFICEBRIDGE_LAST_USED_PATHS_END
+}
+
 
 
 
